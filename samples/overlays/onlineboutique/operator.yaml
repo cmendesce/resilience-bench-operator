@@ -69,7 +69,7 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           value: "access-key-id"
         - name: AWS_SECRET_ACCESS_KEY
-          value: "secret-access-key"""
+          value: "secret-access-key"
         # ports:
         # - containerPort: 8080
         volumeMounts:
