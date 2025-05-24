@@ -1,0 +1,83 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: onlineboutique
+
+configurations:
+  - kustomize-config.yaml
+
+configMapGenerator:
+- name: k6-config
+  files:
+  - k6.js
+
+secretGenerator:
+- name: aws-credentials
+  envs:
+  - aws.env
+
+resources:
+  - namespace.yaml 
+  - benchmark.yaml
+  - workload.yaml
+  - resilient-services.yaml
+  - test-results-pvc.yaml
+  - operator.yaml
+  - app/adservice.yaml
+  - app/cartservice.yaml
+  - app/checkoutservice.yaml
+  - app/currencyservice.yaml
+  - app/emailservice.yaml
+  - app/frontend.yaml
+  - app/paymentservice.yaml
+  - app/productcatalogservice.yaml
+  - app/recommendationservice.yaml
+  - app/shippingservice.yaml
+  - app/redis-cart.yaml
+
+patches:
+  - target:
+      version: v1
+      kind: Deployment
+      name: adservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: cartservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: checkoutservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: currencyservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: emailservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: paymentservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: productcatalogservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: recommendationservice
+    path: app/patches/common.yaml
+  - target:
+      version: v1
+      kind: Deployment
+      name: shippingservice
+    path: app/patches/common.yaml

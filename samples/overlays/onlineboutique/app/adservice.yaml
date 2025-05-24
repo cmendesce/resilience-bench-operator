@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adservice
+  labels:
+    app: adservice
+spec:
+  selector:
+    matchLabels:
+      app: adservice
+  template:
+    metadata:
+      labels:
+        app: adservice
+    spec:
+      serviceAccountName: adservice
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/adservice:v0.10.1
+        ports:
+        - containerPort: 9555
+        env:
+        - name: PORT
+          value: "9555"
+        readinessProbe:
+          grpc:
+            port: 9555
+        livenessProbe:
+          grpc:
+            port: 9555
+      - name: envoy
+        image: ghcr.io/cmendesce/server-app:latest
+        env:
+          - name: FAULT_PERCENTAGE
+            value: "0"
+          - name: BACKEND_PORT
+            value: "9555"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adservice
+  labels:
+    app: adservice
+spec:
+  type: ClusterIP
+  selector:
+    app: adservice
+  ports:
+  - name: grpc
+    port: 9555
+    targetPort: 10000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adservice

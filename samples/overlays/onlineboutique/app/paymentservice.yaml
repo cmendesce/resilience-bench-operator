@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: paymentservice
+  template:
+    metadata:
+      labels:
+        app: paymentservice
+    spec:
+      serviceAccountName: paymentservice
+      containers:
+      - name: server
+        image: gcr.io/google-samples/microservices-demo/paymentservice:v0.10.1
+        ports:
+        - containerPort: 50051
+        env:
+        - name: PORT
+          value: "50051"
+        - name: DISABLE_PROFILER
+          value: "1"
+        readinessProbe:
+          grpc:
+            port: 50051
+        livenessProbe:
+          grpc:
+            port: 50051
+      - name: envoy
+        image: ghcr.io/cmendesce/envoy:latest
+        ports:
+        - containerPort: 9901
+        - containerPort: 10000
+        env:
+          - name: FAULT_PERCENTAGE
+            value: "0"
+          - name: BACKEND_PORT
+            value: "50051"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: paymentservice
+  labels:
+    app: paymentservice
+spec:
+  type: ClusterIP
+  selector:
+    app: paymentservice
+  ports:
+  - name: envoy
+    port: 9901
+    targetPort: 9901
+  - name: grpc
+    port: 50051
+    targetPort: 10000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: paymentservice

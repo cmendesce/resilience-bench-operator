@@ -1,0 +1,40 @@
+apiVersion: resiliencebench.io/v1beta1
+kind: Benchmark
+metadata:
+  name: onlineboutique
+spec:
+  workload: fixed-iterations-loadtest
+  scenarios:
+    - name: baseline
+      fault:
+        provider: envoy
+        percentages: [25, 50, 75]
+        services:
+         - paymentservice
+      connectors:
+        - name: checkout-payment
+          source:
+            name: checkoutservice
+          destination:
+            name: paymentservice
+    - name: retry-checkout
+      fault:
+        provider: envoy
+        percentages: [25, 50, 75]
+        services:
+         - paymentservice
+      connectors:
+        - name: checkout-payment
+          source:
+            name: checkoutservice
+            envs:
+            - name: GRPC_MAX_ATTEMPTS
+              value: ["2", "3", "4", "5"]
+            - name: GRPC_INITIAL_BACKOFF
+              value: ["0.5s", "1s", "1.5s"]
+            - name: GRPC_MAX_BACKOFF
+              value: ["15s"]
+            - name: GRPC_BACKOFF_MULTIPLIER
+              value: ["1", "1.5", "2.0"]
+          destination:
+            name: paymentservice

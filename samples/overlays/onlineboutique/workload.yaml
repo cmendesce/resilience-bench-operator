@@ -1,0 +1,23 @@
+apiVersion: resiliencebench.io/v1beta1
+kind: Workload
+metadata:
+  name: fixed-iterations-loadtest
+spec:
+  options:
+    - name: K6_ITERATIONS
+      value: "1000"
+    - name: K6_NO_THRESHOLDS
+      value: "true"
+    - name: AWS_REGION
+      value: "us-east-1"
+    - name: AWS_ACCESS_KEY_ID
+      value: some-value
+    - name: AWS_SECRET_ACCESS_KEY
+      value: some-value
+    - name: BUCKET_NAME
+      value: phd-carlos-results
+  script:
+    configMap:
+      name: k6-config
+      file: k6.js
+  users: [300, 400, 500]

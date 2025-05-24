@@ -1,0 +1,61 @@
+# deployment 
+- op: add
+  path: /spec/replicas
+  value: 1
+
+- op: add
+  path: /spec/template/spec/terminationGracePeriodSeconds
+  value: 30
+
+# server container
+
+- op: replace
+  path: /spec/template/spec/containers/0/readinessProbe/initialDelaySeconds
+  value: 20
+- op: replace
+  path: /spec/template/spec/containers/0/readinessProbe/periodSeconds
+  value: 15
+- op: replace
+  path: /spec/template/spec/containers/0/livenessProbe/initialDelaySeconds
+  value: 20
+- op: replace
+  path: /spec/template/spec/containers/0/livenessProbe/periodSeconds
+  value: 5
+
+- op: add
+  path: /spec/template/spec/containers/0/lifecycle
+  value:
+    preStop:
+      exec:
+        command: ["/bin/sh", "-c", "sleep 20"]
+
+# envoy container
+
+- op: replace
+  path: /spec/template/spec/containers/1/imagePullPolicy
+  value: "Always"
+
+- op: add
+  path: /spec/template/spec/containers/1/ports
+  value:
+    - containerPort: 10000
+    - containerPort: 9901
+
+- op: add
+  path: /spec/template/spec/containers/1/readinessProbe
+  value:
+    httpGet:
+      path: /ready
+      port: 9901
+    initialDelaySeconds: 20
+    periodSeconds: 15
+
+- op: add
+  path: /spec/template/spec/containers/1/resources
+  value:
+    requests:
+      cpu: 200m
+      memory: 180Mi
+    limits:
+      cpu: 300m
+      memory: 300Mi

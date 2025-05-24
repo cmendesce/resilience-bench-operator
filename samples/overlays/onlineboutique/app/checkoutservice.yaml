@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkoutservice
+  labels:
+    app: checkoutservice
+spec:
+  selector:
+    matchLabels:
+      app: checkoutservice
+  template:
+    metadata:
+      labels:
+        app: checkoutservice
+    spec:
+      serviceAccountName: checkoutservice
+      containers:
+        - name: server
+          image: ghcr.io/cmendesce/microservices-demo/checkoutservice:6f409a642c44a6cb3a1a16cfeca61e65b88f2bd7
+          ports:
+          - containerPort: 5050
+          readinessProbe:
+            grpc:
+              port: 5050
+          livenessProbe:
+            grpc:
+              port: 5050
+          env:
+          - name: PORT
+            value: "5050"
+          - name: PRODUCT_CATALOG_SERVICE_ADDR
+            value: "productcatalogservice:3550"
+          - name: SHIPPING_SERVICE_ADDR
+            value: "shippingservice:50051"
+          - name: PAYMENT_SERVICE_ADDR
+            value: "paymentservice:50051"
+          - name: EMAIL_SERVICE_ADDR
+            value: "emailservice:5000"
+          - name: CURRENCY_SERVICE_ADDR
+            value: "currencyservice:7000"
+          - name: CART_SERVICE_ADDR
+            value: "cartservice:7070"
+          - name: GRPC_MAX_ATTEMPTS
+            value: ""
+          - name: GRPC_INITIAL_BACKOFF
+            value: ""
+          - name: GRPC_MAX_BACKOFF
+            value: ""
+          - name: GRPC_BACKOFF_MULTIPLIER
+            value: ""
+        - name: envoy
+          image: ghcr.io/cmendesce/server-app:latest
+          env:
+            - name: FAULT_PERCENTAGE
+              value: "0"
+            - name: BACKEND_PORT
+              value: "5050"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkoutservice
+  labels:
+    app: checkoutservice
+spec:
+  type: ClusterIP
+  selector:
+    app: checkoutservice
+  ports:
+  - name: grpc
+    port: 5050
+    targetPort: 10000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checkoutservice

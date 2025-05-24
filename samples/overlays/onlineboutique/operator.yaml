@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: resiliencebench-operator
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: resiliencebench-operator-role
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["*"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["*"]
+- apiGroups: ["resiliencebench.io"]
+  resources: ["benchmarks", "scenarios", "queues", "queues/status", "resilientservices", "workloads", "benchmarks/status"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["virtualservices"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: resiliencebench-operator-rolebinding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: resiliencebench-operator
+roleRef:
+  kind: ClusterRole
+  name: resiliencebench-operator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resiliencebench-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resiliencebench-operator
+  template:
+    metadata:
+      labels:
+        app: resiliencebench-operator
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: resiliencebench-operator
+      containers:
+      - name: resiliencebench-operator
+        image: ghcr.io/cmendesce/resilience-bench-operator/resiliencebench-operator:02cab28a7793c13a5d77ca46e6b40a065e1f2520
+        imagePullPolicy: Always
+        env:
+        - name: STORAGE_TYPE
+          value: "cloud"
+        - name: AWS_BUCKET_NAME
+          value: "phd-carlos-results"
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: AWS_REGION
+          value: "us-east-1"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: access-key-id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-credentials
+              key: secret-access-key
+        # ports:
+        # - containerPort: 8080
+        volumeMounts:
+        - mountPath: /results
+          mountPropagation: HostToContainer
+          name: test-results
+        # resources:
+        #   requests:
+        #     memory: "512Mi"
+        #     cpu: "1000m"
+        #   limits:
+        #     memory: "1024Mi"
+        #     cpu: "2000m"
+      volumes:
+      - name: test-results
+        persistentVolumeClaim:
+          claimName: test-results
+        # readinessProbe:
+        #   httpGet:
+        #     path: /healthz
+        #     port: 8080
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 10
