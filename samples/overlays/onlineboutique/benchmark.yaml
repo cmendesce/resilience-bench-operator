@@ -5,28 +5,28 @@ metadata:
 spec:
   workload: fixed-iterations-loadtest
   scenarios:
-    - name: baseline
+    - name: bs-frontend
       fault:
         provider: envoy
         percentages: [25, 50, 75]
         services:
-         - paymentservice
+         - cartservice
       connectors:
-        - name: checkout-payment
+        - name: frontend-cart
           source:
-            name: checkoutservice
+            name: frontendservice
           destination:
-            name: paymentservice
-    - name: retry-checkout
+            name: cartservice
+    - name: retry-cart
       fault:
         provider: envoy
         percentages: [25, 50, 75]
         services:
-         - paymentservice
+         - cartservice
       connectors:
-        - name: checkout-payment
+        - name: rt-frontend-cart
           source:
-            name: checkoutservice
+            name: frontendservice
             envs:
             - name: GRPC_MAX_ATTEMPTS
               value: ["2", "3", "4", "5"]
@@ -37,4 +37,4 @@ spec:
             - name: GRPC_BACKOFF_MULTIPLIER
               value: ["1", "1.5", "2.0"]
           destination:
-            name: paymentservice
+            name: cartservice

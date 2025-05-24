@@ -3,7 +3,7 @@ kind: ResilientService
 metadata:
   name: cartservice
   annotations:
-    resiliencebench.io/container: "server"
+    resiliencebench.io/container: "envoy"
 spec:
   selector:
     matchLabels:
@@ -36,7 +36,7 @@ kind: ResilientService
 metadata:
   name: frontendservice
   annotations:
-    resiliencebench.io/container: "envoy"
+    resiliencebench.io/container: "server"
 spec:
   selector:
     matchLabels:
