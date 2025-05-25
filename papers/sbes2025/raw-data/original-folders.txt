@@ -1,0 +1,6 @@
+"2025-05-20-12-13-41/results.json" # baseline
+"2025-05-18-18-34-47/results.json", # 300 50 3000 it 2 a 5 tentativas.
+"2025-05-18-21-05-34/results.json", # 300 25, 75 3000 it 2 a 5 tentativas.
+"2025-05-19-05-18-55/results.json", # 500 25, 75 3000 it 2 a 5 tentativas.
+"2025-05-19-12-03-03/results.json", # 500 50 3000 it 2 a 5 tentativas.
+"2025-05-19-21-33-00/results.json", # 400 25, 50, 75
