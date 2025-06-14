@@ -12,7 +12,6 @@ import io.resiliencebench.support.CustomResourceRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 import static io.resiliencebench.resources.queue.ExecutionQueueItem.Status.*;
 import static java.time.Duration.ofSeconds;

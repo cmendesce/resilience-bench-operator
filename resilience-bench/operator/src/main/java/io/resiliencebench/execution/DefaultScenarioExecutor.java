@@ -44,7 +44,7 @@ public class DefaultScenarioExecutor implements ScenarioExecutor {
   }
 
   @Override
-  public void execute(Scenario scenario, ExecutionQueue executionQueue, Runnable onCompletion) {
+  public void execute(Scenario scenario, ExecutionQueue executionQueue) {
     var ns = scenario.getMetadata().getNamespace();
     var workloadName = scenario.getSpec().getWorkload().getWorkloadName();
     var workload = workloadRepository.find(ns, workloadName)
@@ -70,7 +70,6 @@ public class DefaultScenarioExecutor implements ScenarioExecutor {
                   scenario.getMetadata().getAnnotations().get(OWNED_BY)
           );
           executePostExecutionSteps(scenario, executionQueue);
-          onCompletion.run();
         }
       }
       @Override
