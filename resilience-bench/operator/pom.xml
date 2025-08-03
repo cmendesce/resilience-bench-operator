@@ -18,6 +18,7 @@
         <fabric8-client.version>6.11.0</fabric8-client.version>
         <junit.version>5.10.3</junit.version>
         <spring-boot.version>3.0.6</spring-boot.version>
+        <start-class>io.resiliencebench.ResilienceBenchOperator</start-class>
     </properties>
 
     <parent>
@@ -216,6 +217,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${start-class}</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
