@@ -19,6 +19,8 @@ spec:
         properties:
           spec:
             properties:
+              appContainerName:
+                type: string
               envs:
                 items:
                   properties:
@@ -68,6 +70,9 @@ spec:
                       type: object
                   type: object
                 type: array
+              faultContainerName:
+                nullable: true
+                type: string
               selector:
                 properties:
                   matchExpressions:
@@ -88,6 +93,8 @@ spec:
                       type: string
                     type: object
                 type: object
+            required:
+            - appContainerName
             type: object
           status:
             type: object
