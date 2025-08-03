@@ -6,8 +6,6 @@ public interface Annotations {
 
   String CREATED_BY = "resiliencebench.io/created-by";
 
-  String CONTAINER = "resiliencebench.io/container";
-
   String VIRTUAL_SERVICE = "resiliencebench.io/virtual-service";
 
   String SCENARIO = "resiliencebench.io/scenario";
