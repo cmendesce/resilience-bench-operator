@@ -71,7 +71,6 @@ spec:
                   type: object
                 type: array
               faultContainerName:
-                nullable: true
                 type: string
               selector:
                 properties:
@@ -93,8 +92,6 @@ spec:
                       type: string
                     type: object
                 type: object
-            required:
-            - appContainerName
             type: object
           status:
             type: object
