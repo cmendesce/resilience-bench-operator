@@ -2,8 +2,6 @@ package io.resiliencebench.resources.service;
 
 import java.util.List;
 
-import io.fabric8.generator.annotation.Nullable;
-import io.fabric8.generator.annotation.Required;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 
@@ -11,9 +9,7 @@ public class ResilientServiceSpec {
 
   private LabelSelector selector;
   private List<EnvVar> envs;
-  @Required
   private String appContainerName;
-  @Nullable
   private String faultContainerName;
 
   public LabelSelector getSelector() {

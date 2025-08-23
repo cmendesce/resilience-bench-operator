@@ -2,9 +2,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: cartservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: cartservice
@@ -13,9 +12,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: paymentservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: paymentservice
@@ -24,9 +22,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: currencyservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: currencyservice
@@ -35,9 +32,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: frontendservice
-  annotations:
-    resiliencebench.io/container: "server"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: frontendservice
@@ -46,9 +42,9 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: checkoutservice
-  annotations:
-    resiliencebench.io/container: "server"
 spec:
+  faultContainerName: "envoy"
+  appContainerName: "server"
   selector:
     matchLabels:
       app: checkoutservice
@@ -57,9 +53,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: adservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: adservice
@@ -68,9 +63,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: productcatalogservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: productcatalogservice
@@ -79,9 +73,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: recommendationservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: recommendationservice
@@ -90,9 +83,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: shippingservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: shippingservice
@@ -101,9 +93,8 @@ apiVersion: resiliencebench.io/v1beta1
 kind: ResilientService
 metadata:
   name: emailservice
-  annotations:
-    resiliencebench.io/container: "envoy"
 spec:
+  faultContainerName: "envoy"
   selector:
     matchLabels:
       app: emailservice
