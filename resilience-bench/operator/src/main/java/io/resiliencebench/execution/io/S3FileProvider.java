@@ -32,13 +32,13 @@ public class S3FileProvider implements FileProvider {
     this.s3Client = s3Client;
   }
 
-  @Override
-  public void writeToFile(String resultFile, String content) {
+   private void internalWriteFile(String resultFile, String content, String contentType) {
     try {
       var contentBytes = content.getBytes(UTF_8);
       InputStream inputStream = new ByteArrayInputStream(contentBytes);
       var metadata = new ObjectMetadata();
       metadata.setContentLength(contentBytes.length);
+      metadata.setContentType(contentType);
       var putObjectRequest = new PutObjectRequest(bucketName, resultFile, inputStream, metadata);
       s3Client.putObject(putObjectRequest);
       logger.info("File {} uploaded to bucket {}.", resultFile, bucketName);
@@ -47,6 +47,16 @@ public class S3FileProvider implements FileProvider {
     } catch (Exception e) {
       logger.warn("Error writing file {}. {}", resultFile, e.getMessage());
     }
+  }
+
+  @Override
+  public void writeToFile(String resultFile, String content) {
+    internalWriteFile(resultFile, content, "application/octet-stream");
+  }
+
+  @Override
+  public void writeToFile(String resultFile, String content, String contentType) {
+    internalWriteFile(resultFile, content, contentType);
   }
 
   @Override
