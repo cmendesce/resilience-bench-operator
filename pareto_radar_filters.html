@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Radar gRPC — Pareto local com filtros</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #121a33;
+    --ink: #e7ecff;
+    --muted: #aab2d6;
+    --accent: #7aa2ff;
+    --grid: rgba(255,255,255,0.12);
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, Apple Color Emoji, Segoe UI Emoji;
+  }
+  .wrap {
+    display: grid; grid-template-columns: 320px 1fr; gap: 20px;
+    min-height: 100vh; padding: 20px;
+  }
+  .panel {
+    background: var(--panel); border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  h1 { font-size: 18px; margin: 0 0 12px 0; font-weight: 600; color: var(--ink); }
+  h2 { font-size: 14px; margin: 14px 0 8px; color: var(--muted); font-weight: 600; }
+  .filters { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .group { border: 1px solid var(--grid); border-radius: 12px; padding: 12px; }
+  .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  label.cb {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink);
+    background: rgba(255,255,255,0.03); border: 1px solid var(--grid);
+    padding: 6px 8px; border-radius: 10px; cursor: pointer; user-select: none;
+  }
+  label.cb input { accent-color: var(--accent); }
+  .actions { display: flex; gap: 8px; margin-top: 8px; }
+  button { background: var(--accent); color: #0b1020; font-weight: 700; border: none; padding: 8px 10px; border-radius: 10px; cursor: pointer; }
+  button.ghost { background: transparent; border: 1px solid var(--grid); color: var(--ink); }
+  .canvas-card { position: relative; background: var(--panel); border-radius: 16px; padding: 16px; }
+  #radar { width: 100%; height: 76vh; display: block; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .hint { color: var(--muted); font-size: 14px; text-align: center; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="panel">
+      <h1>Radar gRPC — Pareto local</h1>
+      <div class="filters">
+        <div class="group">
+          <h2>Filtrar por <strong>fault_percentage</strong></h2>
+          <div id="fp-list" class="chips"></div>
+          <div class="actions">
+            <button id="fp-all">Selecionar tudo</button>
+            <button class="ghost" id="fp-none">Limpar</button>
+          </div>
+        </div>
+        <div class="group">
+          <h2>Filtrar por <strong>workload_users</strong></h2>
+          <div id="wu-list" class="chips"></div>
+          <div class="actions">
+            <button id="wu-all">Selecionar tudo</button>
+            <button class="ghost" id="wu-none">Limpar</button>
+          </div>
+        </div>
+        <div class="meta">
+          <div>Linhas exibidas: <span id="lineCount">0</span></div>
+        </div>
+      </div>
+    </aside>
+    <main class="canvas-card">
+      <canvas id="radar"></canvas>
+      <div id="empty" class="hint" style="display:none;">Selecione ao menos um <em>fault%</em> e um <em>workload</em> para desenhar.</div>
+    </main>
+  </div>
+  <script id="data" type="application/json">{"categories": ["BACKOFF_MULTIPLIER", "INITIAL_BACKOFF", "MAX_ATTEMPTS"], "scenarios": [{"fault_percentage": 25, "workload_users": 300, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.0, 1.0], "success": 1.0, "latency": 1384.1059495}]}, {"fault_percentage": 25, "workload_users": 400, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.0, 0.0, 0.3333333333333333], "success": 0.9856666666666668, "latency": 1713.302207}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.0, 0.6666666666666666], "success": 0.9956666666666668, "latency": 1781.504355}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.5, "MAX_ATTEMPTS": 5}, "norm": [0.0, 1.0, 1.0], "success": 1.0, "latency": 2191.2926660000003}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.0, 1.0], "success": 0.9973333333333332, "latency": 1839.033837}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.5, 1.0], "success": 0.9996666666666668, "latency": 1895.925142}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 1.5, "MAX_ATTEMPTS": 4}, "norm": [1.0, 1.0, 0.6666666666666666], "success": 0.997, "latency": 1789.908777}]}, {"fault_percentage": 25, "workload_users": 500, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 2}, "norm": [0.0, 0.0, 0.0], "success": 0.9383333333333334, "latency": 2115.476874}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.0, 0.6666666666666666], "success": 0.9953333333333332, "latency": 2192.559582}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 2}, "norm": [0.5, 0.5, 0.0], "success": 0.939, "latency": 2119.610576}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [1.0, 0.0, 1.0], "success": 0.9993333333333332, "latency": 2297.0269825}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 5}, "norm": [1.0, 0.5, 1.0], "success": 0.9986666666666668, "latency": 2213.1917065}]}, {"fault_percentage": 50, "workload_users": 300, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 2}, "norm": [0.5, 0.0, 0.0], "success": 0.712, "latency": 1406.366402}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.5, 0.0, 0.3333333333333333], "success": 0.8773333333333333, "latency": 1486.230561}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.0, 1.0], "success": 0.971, "latency": 1695.952078}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.5, 1.0], "success": 0.9756666666666668, "latency": 1819.575133}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 1.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 1.0, 1.0], "success": 0.976, "latency": 1997.655865}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 2}, "norm": [1.0, 0.0, 0.0], "success": 0.7526666666666667, "latency": 1478.4888675000002}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [1.0, 0.0, 0.6666666666666666], "success": 0.9383333333333334, "latency": 1679.037185}]}, {"fault_percentage": 50, "workload_users": 400, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.0, 0.0, 0.3333333333333333], "success": 0.8763333333333333, "latency": 1799.896859}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.0, 0.6666666666666666], "success": 0.9413333333333334, "latency": 2002.776579}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.0, 0.0, 1.0], "success": 0.9676666666666668, "latency": 2013.129951}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.0, 1.0], "success": 0.9686666666666668, "latency": 2207.5737555}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 2}, "norm": [1.0, 0.0, 0.0], "success": 0.764, "latency": 1683.7083855}]}, {"fault_percentage": 50, "workload_users": 500, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.0, 0.0, 0.3333333333333333], "success": 0.8776666666666667, "latency": 2188.510974}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.0, 0.0, 1.0], "success": 0.9706666666666668, "latency": 2696.5991445}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.5, 0.6666666666666666], "success": 0.94, "latency": 2479.3834435}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 5}, "norm": [0.0, 0.5, 1.0], "success": 0.9683333333333334, "latency": 2594.972892}]}, {"fault_percentage": 75, "workload_users": 300, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.0, 0.0, 0.3333333333333333], "success": 0.5826666666666667, "latency": 1496.5234095}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.0, 0.6666666666666666], "success": 0.6676666666666666, "latency": 1788.929219}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.0, 0.0, 1.0], "success": 0.7683333333333333, "latency": 1813.852911}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 2}, "norm": [0.0, 0.5, 0.0], "success": 0.4333333333333333, "latency": 1479.3984725}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 5}, "norm": [0.0, 0.5, 1.0], "success": 0.7736666666666666, "latency": 1995.260879}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.0, 1.0], "success": 0.7706666666666667, "latency": 1988.047145}]}, {"fault_percentage": 75, "workload_users": 400, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.0, 0.0, 0.3333333333333333], "success": 0.576, "latency": 2109.2020365}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.0, 0.6666666666666666], "success": 0.678, "latency": 2195.648775}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.5, 0.0, 0.3333333333333333], "success": 0.571, "latency": 1994.185763}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.5, 0.0, 0.6666666666666666], "success": 0.686, "latency": 2284.126383}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 0.0, 1.0], "success": 0.7713333333333333, "latency": 2296.771503}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 1.5, "MAX_ATTEMPTS": 2}, "norm": [0.5, 1.0, 0.0], "success": 0.458, "latency": 1711.2376250000002}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 1.5, "MAX_ATTEMPTS": 5}, "norm": [0.5, 1.0, 1.0], "success": 0.7736666666666666, "latency": 2902.751748}, {"params": {"BACKOFF_MULTIPLIER": 2.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [1.0, 0.0, 0.3333333333333333], "success": 0.5606666666666666, "latency": 1992.3960205}]}, {"fault_percentage": 75, "workload_users": 500, "combos": [{"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 4}, "norm": [0.0, 0.0, 0.6666666666666666], "success": 0.6833333333333333, "latency": 2402.725718}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 5}, "norm": [0.0, 0.0, 1.0], "success": 0.768, "latency": 2488.994954}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.0, "MAX_ATTEMPTS": 2}, "norm": [0.0, 0.5, 0.0], "success": 0.4436666666666666, "latency": 2210.997296}, {"params": {"BACKOFF_MULTIPLIER": 1.0, "INITIAL_BACKOFF": 1.5, "MAX_ATTEMPTS": 5}, "norm": [0.0, 1.0, 1.0], "success": 0.7743333333333333, "latency": 3213.818209}, {"params": {"BACKOFF_MULTIPLIER": 1.5, "INITIAL_BACKOFF": 0.5, "MAX_ATTEMPTS": 3}, "norm": [0.5, 0.0, 0.3333333333333333], "success": 0.5576666666666666, "latency": 2304.408271}]}], "allFaultPercentages": [25, 50, 75], "allWorkloads": [300, 400, 500]}</script>
+  <script>
+    const DATA = JSON.parse(document.getElementById('data').textContent);
+    const categories = DATA.categories; // 3 axes
+    const scenarios = DATA.scenarios;
+    const allFP = DATA.allFaultPercentages;
+    const allWU = DATA.allWorkloads;
+
+    // Build checkbox lists
+    const fpList = document.getElementById('fp-list');
+    const wuList = document.getElementById('wu-list');
+    function makeBox(container, name, value, checked=true) {
+      const id = name + '-' + value;
+      const label = document.createElement('label');
+      label.className = 'cb';
+      label.htmlFor = id;
+      label.innerHTML = `<input type="checkbox" id="${id}" value="${value}" ${checked?'checked':''} /> ${
+        name === 'fp' ? value + '%' : value
+      }`;
+      container.appendChild(label);
+    }
+    allFP.forEach(v => makeBox(fpList, 'fp', v, true));
+    allWU.forEach(v => makeBox(wuList, 'wu', v, true));
+
+    // Select all / none
+    function setAll(container, checked) {
+      container.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = checked);
+      draw();
+    }
+    document.getElementById('fp-all').onclick = () => setAll(fpList, true);
+    document.getElementById('fp-none').onclick = () => setAll(fpList, false);
+    document.getElementById('wu-all').onclick = () => setAll(wuList, true);
+    document.getElementById('wu-none').onclick = () => setAll(wuList, false);
+
+    fpList.onchange = draw;
+    wuList.onchange = draw;
+
+    // Radar rendering (no legend, no radial labels, lines only)
+    const canvas = document.getElementById('radar');
+    const ctx = canvas.getContext('2d');
+    function resize() {
+      canvas.width = canvas.clientWidth * devicePixelRatio;
+      canvas.height = canvas.clientHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      draw();
+    }
+    const RGRID = 5;
+    const COLORS = [
+      '#7aa2ff','#9cdaff','#ffd480','#ff9a8b','#c7f0bd','#ffb3de','#b0a3ff','#7fffd4','#ffd6a5','#b6e3ff'
+    ];
+
+    function getSelected(setEl) {
+      return new Set([...setEl.querySelectorAll('input[type=checkbox]:checked')].map(cb => parseInt(cb.value)));
+    }
+
+    function flattenSelectedLines(selectedFP, selectedWU) {
+      const lines = [];
+      scenarios.forEach(s => {
+        if (selectedFP.has(s.fault_percentage) && selectedWU.has(s.workload_users)) {
+          s.combos.forEach(c => lines.push({
+            norm: c.norm, success: c.success, latency: c.latency,
+            fp: s.fault_percentage, wu: s.workload_users, params: c.params
+          }));
+        }
+      });
+      return lines;
+    }
+
+    function draw() {
+      const selectedFP = getSelected(fpList);
+      const selectedWU = getSelected(wuList);
+      const lines = flattenSelectedLines(selectedFP, selectedWU);
+
+      // Clear
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+
+      const emptyEl = document.getElementById('empty');
+      document.getElementById('lineCount').textContent = lines.length;
+      if (lines.length === 0) { emptyEl.style.display='block'; return; }
+      emptyEl.style.display='none';
+
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      const cx = w/2, cy = h/2, radius = Math.min(w, h) * 0.40;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      // angles for 3 axes (start at -90deg so first axis up)
+      const angles = [ -Math.PI/2, -Math.PI/2 + 2*Math.PI/3, -Math.PI/2 + 4*Math.PI/3 ];
+
+      // grid (no numeric labels)
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      for (let r=1; r<=RGRID; r++) {
+        const rad = radius * (r/RGRID);
+        ctx.beginPath();
+        for (let i=0; i<angles.length; i++) {
+          const a = angles[i];
+          const x = Math.cos(a) * rad;
+          const y = Math.sin(a) * rad;
+          if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+      // axes
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      angles.forEach(a => {
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(Math.cos(a)*radius, Math.sin(a)*radius);
+        ctx.stroke();
+      });
+      // axis labels at ends
+      ctx.fillStyle = '#e7ecff';
+      ctx.font = '14px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      const labels = categories;
+      for (let i=0;i<angles.length;i++) {
+        const a = angles[i];
+        const x = Math.cos(a)*(radius+14);
+        const y = Math.sin(a)*(radius+14);
+        ctx.textAlign = Math.cos(a) > 0.1 ? 'left' : (Math.cos(a) < -0.1 ? 'right' : 'center');
+        ctx.textBaseline = Math.sin(a) > 0 ? 'top' : 'bottom';
+        ctx.fillText(labels[i], x, y);
+      }
+
+      // draw lines
+      let colorIdx = 0;
+      lines.forEach(line => {
+        const vals = line.norm;
+        ctx.beginPath();
+        for (let i=0; i<vals.length; i++) {
+          const a = angles[i];
+          const r = vals[i] * radius;
+          const x = Math.cos(a) * r;
+          const y = Math.sin(a) * r;
+          if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        // close
+        const a0 = angles[0];
+        ctx.lineTo(Math.cos(a0)*vals[0]*radius, Math.sin(a0)*vals[0]*radius);
+        ctx.strokeStyle = COLORS[colorIdx % COLORS.length];
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        colorIdx++;
+      });
+
+      ctx.restore();
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+  </script>
+</body>
+</html>
