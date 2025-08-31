@@ -10,7 +10,6 @@ import io.resiliencebench.resources.benchmark.Benchmark;
 import io.resiliencebench.resources.queue.ExecutionQueue;
 import io.resiliencebench.resources.queue.ExecutionQueueSpec;
 import io.resiliencebench.resources.queue.ExecutionQueueItem;
-import io.resiliencebench.resources.queue.ExecutionQueueStatus;
 import io.resiliencebench.resources.scenario.Scenario;
 import static io.resiliencebench.support.Annotations.OWNED_BY;
 
@@ -40,7 +39,6 @@ public class ExecutionQueueFactory {
     );
 
     var queue = new ExecutionQueue(spec, meta);
-    queue.setStatus(new ExecutionQueueStatus(0, items.size(), 0));
     return queue;
   }
 }

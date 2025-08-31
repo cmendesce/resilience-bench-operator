@@ -16,5 +16,7 @@ public interface Annotations {
 
   String ENVOY_SERVICE = "resiliencebench.io/envoy-service";
 
+  String EXECUTION_ID = "resiliencebench.io/execution-id";
+
   String ENVOY_PORT = "envoy";
 }
