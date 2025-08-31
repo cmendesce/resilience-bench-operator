@@ -49,7 +49,6 @@ public class BenchmarkController implements Reconciler<Benchmark> {
     logger.info("Reconciling benchmark: {} in namespace: {}", benchmarkName, namespace);
 
     try {
-      // Check if this is a periodic reconcile on an already completed benchmark
       var currentStatus = benchmark.getStatus();
       var currentGeneration = benchmark.getMetadata().getGeneration();
       
@@ -75,7 +74,6 @@ public class BenchmarkController implements Reconciler<Benchmark> {
 
       var executionQueue = prepareToRunScenarios(benchmark, scenariosList);
 
-      // Create or update status with proper tracking
       var status = createOrUpdateStatus(benchmark, scenariosList.size());
       benchmark.setStatus(status);
 
@@ -106,14 +104,12 @@ public class BenchmarkController implements Reconciler<Benchmark> {
     var currentGeneration = benchmark.getMetadata().getGeneration();
     
     if (currentStatus == null || currentStatus.needsReconciliation(currentGeneration)) {
-      // Create new status for new benchmark or when spec has changed
       var newStatus = new BenchmarkStatus(totalScenarios);
       newStatus.setObservedGeneration(currentGeneration);
       logger.info("Created new status for benchmark {} with {} total scenarios", 
                  benchmark.getMetadata().getName(), totalScenarios);
       return newStatus;
     } else {
-      // Update existing status
       currentStatus.updateReconcileTime();
       currentStatus.setObservedGeneration(currentGeneration);
       logger.info("Updated existing status for benchmark {}", benchmark.getMetadata().getName());
@@ -124,7 +120,6 @@ public class BenchmarkController implements Reconciler<Benchmark> {
   private List<Scenario> createScenarios(Benchmark benchmark, Workload workload) {
     var namespace = benchmark.getMetadata().getNamespace();
     
-    // Clean up existing scenarios for this benchmark to avoid conflicts
     scenarioRepository.deleteAll(namespace);
 
     var scenariosList = ScenarioFactory.create(benchmark, workload);
@@ -137,15 +132,12 @@ public class BenchmarkController implements Reconciler<Benchmark> {
   private ExecutionQueue prepareToRunScenarios(Benchmark benchmark, List<Scenario> scenariosList) {
     var namespace = benchmark.getMetadata().getNamespace();
     
-    // Ensure scenarios are created
     scenarioRepository.deleteAll(namespace);
     scenariosList.forEach(scenarioRepository::create);
 
-    // Clean up existing queues and create new one
     queueRepository.deleteAll(namespace);
     var queueCreated = ExecutionQueueFactory.create(benchmark, scenariosList);
     
-    // Add execution ID to the queue for tracking
     if (benchmark.getStatus() != null && benchmark.getStatus().getExecutionId() != null) {
       if (queueCreated.getMetadata().getLabels() == null) {
         queueCreated.getMetadata().setLabels(new java.util.HashMap<>());

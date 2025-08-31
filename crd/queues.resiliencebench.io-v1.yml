@@ -13,20 +13,7 @@ spec:
     singular: queue
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.finished
-      name: Finished
-      priority: 0
-      type: integer
-    - jsonPath: .status.pending
-      name: Pending
-      priority: 0
-      type: integer
-    - jsonPath: .status.running
-      name: Running
-      priority: 0
-      type: integer
-    name: v1beta1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
         properties:
@@ -39,8 +26,9 @@ spec:
                 description: The list of items to execute.
                 items:
                   properties:
-                    finishedAt:
-                      description: The time when the execution finished.
+                    phase:
+                      description: "The status of the execution. Can be 'pending',\
+                        \ 'running' or 'finished'. Automatically managed."
                       type: string
                     resultFile:
                       description: The path of the file with the item's results. Automatically
@@ -48,13 +36,6 @@ spec:
                       type: string
                     scenario:
                       description: The name of the scenario it belongs to.
-                      type: string
-                    startedAt:
-                      description: The time when the execution started.
-                      type: string
-                    status:
-                      description: "The status of the execution. Can be 'pending',\
-                        \ 'running' or 'finished'. Automatically managed."
                       type: string
                   type: object
                 type: array
@@ -64,16 +45,7 @@ spec:
                 type: string
             type: object
           status:
-            properties:
-              finished:
-                type: integer
-              pending:
-                type: integer
-              running:
-                type: integer
             type: object
         type: object
     served: true
     storage: true
-    subresources:
-      status: {}

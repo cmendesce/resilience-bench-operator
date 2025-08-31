@@ -2,6 +2,7 @@ package io.resiliencebench.resources.benchmark;
 
 import io.fabric8.crd.generator.annotation.PrinterColumn;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.resiliencebench.resources.Phase;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -181,12 +182,5 @@ public class BenchmarkStatus {
 
   private static String generateExecutionId() {
     return "exec-" + System.currentTimeMillis();
-  }
-
-  public static class Phase {
-    public static final String PENDING = "Pending";
-    public static final String RUNNING = "Running";
-    public static final String COMPLETED = "Completed";
-    public static final String FAILED = "Failed";
   }
 }

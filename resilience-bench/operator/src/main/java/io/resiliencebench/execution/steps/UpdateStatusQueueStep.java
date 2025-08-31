@@ -10,11 +10,7 @@ import io.resiliencebench.support.CustomResourceRepository;
 import io.resiliencebench.execution.BenchmarkStatusUpdater;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
-import static io.resiliencebench.resources.queue.ExecutionQueueItem.Status.*;
 import static java.time.Duration.ofSeconds;
-import static java.time.ZoneId.*;
 
 @Service
 public class UpdateStatusQueueStep extends ExecutorStep {
@@ -46,13 +42,10 @@ public class UpdateStatusQueueStep extends ExecutorStep {
   private void updateQueueItem(String queueName, String scenarioName, String namespace) {
     var queue = executionRepository.get(namespace, queueName);
     var queueItem = queue.getItem(scenarioName);
-    var now = LocalDateTime.now().atZone(of("UTC")).toString();
     if (queueItem.isRunning()) {
-      queueItem.setStatus(FINISHED);
-      queueItem.setFinishedAt(now);
+      queueItem.markAsCompleted();
     } else if (queueItem.isPending()) {
-      queueItem.setStatus(RUNNING);
-      queueItem.setStartedAt(now);
+      queueItem.markAsRunning();
     }
 
     queue.getMetadata().setNamespace(namespace);
@@ -64,20 +57,18 @@ public class UpdateStatusQueueStep extends ExecutorStep {
     var benchmarkName = executionQueue.getMetadata().getName();
     var scenarioName = scenario.getMetadata().getName();
     var namespace = scenario.getMetadata().getNamespace();
-    
     Retry.of("updateQueueItem", retryConfig)
-            .executeRunnable(() -> {
-                updateQueueItem(benchmarkName, scenarioName, namespace);
-                
-                // Update benchmark status based on queue item state
-                var queue = executionRepository.get(namespace, benchmarkName);
-                var queueItem = queue.getItem(scenarioName);
-                
-                if (queueItem.isRunning()) {
-                    statusUpdater.markScenarioAsStarted(namespace, benchmarkName, scenarioName);
-                } else if (queueItem.isFinished()) {
-                    statusUpdater.markScenarioAsCompleted(namespace, benchmarkName, scenarioName);
-                }
-            });
+            .executeRunnable(() -> updateStatus(benchmarkName, scenarioName, namespace));
+  }
+
+  private void updateStatus(String benchmarkName, String scenarioName, String namespace) {
+    updateQueueItem(benchmarkName, scenarioName, namespace);
+    var queue = executionRepository.get(namespace, benchmarkName);
+    var queueItem = queue.getItem(scenarioName);
+    if (queueItem.isRunning()) {
+        statusUpdater.markScenarioAsStarted(namespace, benchmarkName, scenarioName);
+    } else if (queueItem.isFinished()) {
+        statusUpdater.markScenarioAsCompleted(namespace, benchmarkName, scenarioName);
+    }
   }
 }
