@@ -1,4 +1,3 @@
-
 package io.resiliencebench.execution;
 
 import static java.lang.String.format;
@@ -18,43 +17,35 @@ public class DefaultQueueExecutor implements QueueExecutor {
   private final static Logger logger = LoggerFactory.getLogger(DefaultQueueExecutor.class);
 
   private final CustomResourceRepository<Scenario> scenarioRepository;
-  private final CustomResourceRepository<ExecutionQueue> executionRepository;
 
   private final ScenarioExecutor scenarioExecutor;
 
-  public DefaultQueueExecutor(
-          CustomResourceRepository<Scenario> scenarioRepository,
-          CustomResourceRepository<ExecutionQueue> executionRepository,
-          ScenarioExecutor scenarioExecutor) {
+  public DefaultQueueExecutor(CustomResourceRepository<Scenario> scenarioRepository, ScenarioExecutor scenarioExecutor) {
     this.scenarioRepository = scenarioRepository;
-    this.executionRepository = executionRepository;
     this.scenarioExecutor = scenarioExecutor;
   }
 
   @Override
   public void execute(ExecutionQueue queue) {
-    var queueToExecute = executionRepository.find(queue.getMetadata())
-            .orElseThrow(() -> new RuntimeException("Queue not found " + queue.getMetadata().getName()));
-
-    var nextItem = queueToExecute.getNextPendingItem();
+    var nextItem = queue.getNextPendingItem();
 
     if (nextItem.isPresent() && nextItem.get().isPending()) {
-      executeScenario(nextItem.get(), queueToExecute);
+      internalExecute(nextItem.get(), queue);
     } else {
-      logger.info("No item available for queue: {}", queueToExecute.getMetadata().getName());
-      if (queueToExecute.isDone()) {
-        logger.info("All items finished for: {}", queueToExecute.getMetadata().getName());
+      logger.info("No pending items available for queue: {}", queue.getMetadata().getName());
+      if (queue.isDone()) {
+        logger.info("All items finished for: {}", queue.getMetadata().getName());
       }
     }
   }
 
-  private void executeScenario(ExecutionQueueItem item, ExecutionQueue executionQueue) {
+  private void internalExecute(ExecutionQueueItem item, ExecutionQueue executionQueue) {
     var scenarioName = item.getScenario();
     var namespace = executionQueue.getMetadata().getNamespace();
     var scenario = scenarioRepository.find(namespace, scenarioName);
     if (scenario.isPresent()) {
       logger.info("Running scenario: {}", scenarioName);
-      scenarioExecutor.execute(scenario.get(), executionQueue, () -> execute(executionQueue));
+      scenarioExecutor.execute(scenario.get(), executionQueue);
     } else {
       throw new RuntimeException(format("Scenario not found: %s.%s", namespace, scenarioName));
     }

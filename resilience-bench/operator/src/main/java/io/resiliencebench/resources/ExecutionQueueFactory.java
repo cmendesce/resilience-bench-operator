@@ -23,6 +23,7 @@ public class ExecutionQueueFactory {
     var meta = new ObjectMetaBuilder()
             .withNamespace(benchmark.getMetadata().getNamespace())
             .addToAnnotations(OWNED_BY, benchmark.getMetadata().getNamespace())
+            .addToLabels("execution-id", benchmark.getStatus().getExecutionId())
             .withName(benchmark.getMetadata().getName())
             .build();
 
