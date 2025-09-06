@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static io.resiliencebench.support.Annotations.CONTAINER;
-
 @Service
 public class EnvironmentPostStep extends AbstractEnvironmentStep {
 
@@ -44,7 +42,7 @@ public class EnvironmentPostStep extends AbstractEnvironmentStep {
 
   public void restoreEnvironment(Scenario scenario, io.resiliencebench.resources.scenario.Service service) {
     var resilientService = resilientServiceRepository.get(scenario.getMetadata().getNamespace(), service.getName());
-    var containerName = resilientService.getMetadata().getAnnotations().get(CONTAINER);
+    var containerName = resilientService.getSpec().getAppContainerName();
 
     var env = resilientService.getSpec().getEnvs();
     if (env == null) {

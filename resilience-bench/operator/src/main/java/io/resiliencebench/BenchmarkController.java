@@ -36,42 +36,94 @@ public class BenchmarkController implements Reconciler<Benchmark> {
         this.queueRepository = queueRepository;
     }
 
-    @Override
-    public UpdateControl<Benchmark> reconcile(Benchmark benchmark, Context<Benchmark> context) {
-        logger.info("Reconciling Benchmark: {}", benchmark.getMetadata().getName());
+  @Override
+  public UpdateControl<Benchmark> reconcile(Benchmark benchmark, Context<Benchmark> context) {
+    var benchmarkName = benchmark.getMetadata().getName();
+    var namespace = benchmark.getMetadata().getNamespace();
 
-        var workload = workloadRepository.find(benchmark.getMetadata().getNamespace(), benchmark.getSpec().getWorkload());
-        if (workload.isEmpty()) {
-            logger.error("Workload not found: {}", benchmark.getSpec().getWorkload());
-            return UpdateControl.noUpdate();
-        }
+    logger.info("Reconciling benchmark: {} in namespace: {}", benchmarkName, namespace);
 
-        var scenariosList = createScenarios(benchmark, workload.get());
-        if (scenariosList.isEmpty()) {
-            logger.error("No scenarios generated for benchmark {}", benchmark.getMetadata().getName());
-            return UpdateControl.noUpdate();
-        }
+    try {
+      var currentStatus = benchmark.getStatus();
+      var currentGeneration = benchmark.getMetadata().getGeneration();
 
-        createExecutionQueue(benchmark, scenariosList);
-
-        logger.info("Benchmark reconciled {}. {} scenarios created",
-                benchmark.getMetadata().getName(),
-                scenariosList.size()
-        );
-        benchmark.setStatus(new BenchmarkStatus(scenariosList.size()));
+      if (currentStatus != null &&
+          currentStatus.isCompleted() &&
+          !currentStatus.needsReconciliation(currentGeneration)) {
+        logger.info("Benchmark {} is already completed and no spec changes detected, skipping reconciliation", benchmarkName);
+        currentStatus.updateReconcileTime();
         return UpdateControl.updateStatus(benchmark);
-    }
+      }
 
-    private List<Scenario> createScenarios(Benchmark benchmark, Workload workload) {
-        scenarioRepository.deleteAll(benchmark.getMetadata().getNamespace());
-        var scenariosList = ScenarioFactory.create(benchmark, workload);
-        scenariosList.forEach(scenarioRepository::create);
-        return scenariosList;
-    }
+      var workload = workloadRepository.find(namespace, benchmark.getSpec().getWorkload());
+      if (workload.isEmpty()) {
+        logger.error("Workload not found: {}", benchmark.getSpec().getWorkload());
+        return updateStatusWithError(benchmark, "Workload not found: " + benchmark.getSpec().getWorkload());
+      }
 
-    private ExecutionQueue createExecutionQueue(Benchmark benchmark, List<Scenario> scenariosList) {
-        queueRepository.deleteAll(benchmark.getMetadata().getNamespace());
-        var queueCreated = ExecutionQueueFactory.create(benchmark, scenariosList);
-        return queueRepository.create(queueCreated);
+      var scenariosList = createScenarios(benchmark, workload.get());
+      if (scenariosList.isEmpty()) {
+        logger.error("No scenarios generated for benchmark {}", benchmarkName);
+        return updateStatusWithError(benchmark, "No scenarios generated");
+      }
+
+      createQueue(benchmark, scenariosList);
+
+      var status = createOrUpdateStatus(benchmark, scenariosList.size());
+      benchmark.setStatus(status);
+
+      logger.info("Benchmark reconciled {}. {} scenarios created", benchmarkName, scenariosList.size());
+
+      return UpdateControl.updateStatus(benchmark);
+
+    } catch (Exception e) {
+      logger.error("Error during reconciliation of benchmark: " + benchmarkName, e);
+      return updateStatusWithError(benchmark, "Reconciliation error: " + e.getMessage());
     }
+  }
+
+  private UpdateControl<Benchmark> updateStatusWithError(Benchmark benchmark, String errorMessage) {
+    var status = benchmark.getStatus();
+    if (status == null) {
+      status = new BenchmarkStatus(0);
+      benchmark.setStatus(status);
+    }
+    status.markAsFailed(errorMessage);
+    status.setObservedGeneration(benchmark.getMetadata().getGeneration());
+    return UpdateControl.updateStatus(benchmark);
+  }
+
+  private BenchmarkStatus createOrUpdateStatus(Benchmark benchmark, int totalScenarios) {
+    var currentStatus = benchmark.getStatus();
+    var currentGeneration = benchmark.getMetadata().getGeneration();
+
+    if (currentStatus == null || currentStatus.needsReconciliation(currentGeneration)) {
+      var newStatus = new BenchmarkStatus(totalScenarios);
+      newStatus.setObservedGeneration(currentGeneration);
+      logger.info("Created new status for benchmark {} with {} total scenarios",
+                 benchmark.getMetadata().getName(), totalScenarios);
+      return newStatus;
+    } else {
+      currentStatus.updateReconcileTime();
+      currentStatus.setObservedGeneration(currentGeneration);
+      logger.info("Updated existing status for benchmark {}", benchmark.getMetadata().getName());
+      return currentStatus;
+    }
+  }
+
+  private List<Scenario> createScenarios(Benchmark benchmark, Workload workload) {
+    var namespace = benchmark.getMetadata().getNamespace();
+    scenarioRepository.deleteAll(namespace);
+    var scenariosList = ScenarioFactory.create(benchmark, workload);
+    scenariosList.forEach(scenarioRepository::create);
+    logger.info("Created {} scenarios for benchmark: {}", scenariosList.size(), benchmark.getMetadata().getName());
+    return scenariosList;
+  }
+
+  private void createQueue(Benchmark benchmark, List<Scenario> scenariosList) {
+    var namespace = benchmark.getMetadata().getNamespace();
+    queueRepository.deleteAll(namespace);
+    var queueCreated = ExecutionQueueFactory.create(benchmark, scenariosList);
+    queueRepository.create(queueCreated);
+  }
 }

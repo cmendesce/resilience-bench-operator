@@ -3,6 +3,7 @@ package io.resiliencebench.resources.queue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import io.resiliencebench.resources.Phase;
 
 public class ExecutionQueueItem {
 
@@ -11,20 +12,14 @@ public class ExecutionQueueItem {
   private String scenario;
   @JsonPropertyDescription("The status of the execution. Can be 'pending', 'running' or 'finished'. Automatically managed.")
   @JsonProperty(required = true)
-  private String status;
-  @JsonPropertyDescription("The time when the execution started.")
-  private String startedAt;
-  @JsonPropertyDescription("The time when the execution finished.")
-  private String finishedAt;
+  private String phase;
   @JsonPropertyDescription("The path of the file with the item's results. Automatically created.")
   private String resultFile;
 
   public ExecutionQueueItem(String scenario, String resultFile) {
     this.scenario = scenario;
     this.resultFile = resultFile;
-    this.status = Status.PENDING;
-    this.finishedAt = "";
-    this.startedAt = "";
+    this.phase = Phase.PENDING;
   }
 
   public ExecutionQueueItem() {
@@ -34,44 +29,40 @@ public class ExecutionQueueItem {
     return scenario;
   }
 
-  @JsonIgnore
-  public boolean isFinished() {
-    return status.equals(Status.FINISHED);
-  }
-
   public void setStatus(String status) {
-    this.status = status;
+    this.phase = status;
   }
 
-   public String getStatus() {
-    return status;
-  }
-
-  public void setStartedAt(String startedAt) {
-    this.startedAt = startedAt;
-  }
-
-  public void setFinishedAt(String finishedAt) {
-    this.finishedAt = finishedAt;
-  }
-
-  @JsonIgnore
-  public boolean isPending() {
-    return status.equals(Status.PENDING);
-  }
-
-  @JsonIgnore
-  public boolean isRunning() {
-    return status.equals(Status.RUNNING);
+  public String getStatus() {
+    return phase;
   }
 
   public String getResultFile() {
     return resultFile;
   }
 
-  public interface Status {
-    String PENDING = "pending";
-    String RUNNING = "running";
-    String FINISHED = "finished";
+  @JsonIgnore
+  public boolean isPending() {
+    return phase.equals(Phase.PENDING);
+  }
+
+  @JsonIgnore
+  public boolean isRunning() {
+    return phase.equals(Phase.RUNNING);
+  }
+
+  @JsonIgnore
+  public boolean isFinished() {
+    return phase.equals(Phase.COMPLETED);
+  }
+
+  @JsonIgnore
+  public void markAsCompleted() {
+    this.setStatus(Phase.COMPLETED);
+  }
+
+  @JsonIgnore
+  public void markAsRunning() {
+    this.setStatus(Phase.RUNNING);
   }
 }

@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static io.resiliencebench.support.Annotations.CONTAINER;
-
 @Service
 public class EnvironmentStep extends AbstractEnvironmentStep {
 
@@ -40,7 +38,7 @@ public class EnvironmentStep extends AbstractEnvironmentStep {
       return;
     }
     var resilientService = resilientServiceRepository.get(scenario.getMetadata().getNamespace(), service.getName());
-    var containerName = resilientService.getMetadata().getAnnotations().get(CONTAINER);
+    var containerName = resilientService.getSpec().getAppContainerName();
 
     var deployment = kubernetesClient()
         .apps()

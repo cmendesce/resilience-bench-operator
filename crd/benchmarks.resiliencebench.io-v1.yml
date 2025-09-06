@@ -14,6 +14,18 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .status.completedScenarios
+      name: Completed
+      priority: 3
+      type: integer
+    - jsonPath: .status.phase
+      name: Phase
+      priority: 0
+      type: string
+    - jsonPath: .status.runningScenarios
+      name: Running
+      priority: 2
+      type: integer
     - jsonPath: .status.totalScenarios
       name: Total Scenarios
       priority: 1
@@ -174,6 +186,24 @@ spec:
             type: object
           status:
             properties:
+              completedScenarios:
+                type: integer
+              completionTime:
+                type: string
+              executionId:
+                type: string
+              lastReconcileTime:
+                type: string
+              message:
+                type: string
+              observedGeneration:
+                type: integer
+              phase:
+                type: string
+              runningScenarios:
+                type: integer
+              startTime:
+                type: string
               totalScenarios:
                 type: integer
             type: object

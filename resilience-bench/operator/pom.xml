@@ -9,22 +9,45 @@
     <version>1.0.0</version>
 
     <properties>
-        <operator.version>4.8.2</operator.version>
+        <!-- Java version -->
+        <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Dependency versions -->
+        <operator.version>4.8.2</operator.version>
+        <fabric8-client.version>6.11.0</fabric8-client.version>
+        <aws-sdk.version>1.12.757</aws-sdk.version>
+        <resilience4j.version>2.2.0</resilience4j.version>
+        <log4j.version>2.24.1</log4j.version>
+        <takes.version>1.24.4</takes.version>
+
+        <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
         <jib-maven-plugin.version>3.4.2</jib-maven-plugin.version>
-        <fabric8-client.version>6.11.0</fabric8-client.version>
+
+        <!-- Test versions -->
         <junit.version>5.10.3</junit.version>
-        <spring-boot.version>3.0.6</spring-boot.version>
+        <mockito.version>5.11.0</mockito.version>
+        <awaitility.version>4.2.1</awaitility.version>
+
+
+        <!-- Application config -->
+        <start-class>io.resiliencebench.ResilienceBenchOperator</start-class>
+
+        <!-- Docker config -->
+        <docker.image.name>resiliencebench-operator</docker.image.name>
+        <docker.base.image>gcr.io/distroless/java17-debian11@sha256:fb33b0098b86d965a1ef64ec49b8ff0a28ae8be939f0df736c4af9251180a896</docker.base.image>
     </properties>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.4</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <dependencyManagement>
@@ -55,12 +78,12 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
-            <version>6.11.0</version>
+            <version>${fabric8-client.version}</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.12.757</version>
+            <version>${aws-sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -84,16 +107,16 @@
             <version>${fabric8-client.version}</version>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.23.1</version>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.takes</groupId>
             <artifactId>takes</artifactId>
-            <version>1.24.4</version>
+            <version>${takes.version}</version>
         </dependency>
 
         <!-- spring -->
@@ -105,7 +128,7 @@
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
-            <version>2.2.0</version>
+            <version>${resilience4j.version}</version>
         </dependency>
 
         <!-- testing -->
@@ -117,13 +140,13 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.2.1</version>
+            <version>${awaitility.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.11.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -161,10 +184,10 @@
                 <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
-                        <image>gcr.io/distroless/java17-debian11</image>
+                        <image>${docker.base.image}</image>
                     </from>
                     <to>
-                        <image>resiliencebench-operator</image>
+                        <image>${docker.image.name}</image>
                     </to>
                 </configuration>
                 <executions>
@@ -216,6 +239,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${start-class}</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

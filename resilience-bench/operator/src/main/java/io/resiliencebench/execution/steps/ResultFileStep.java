@@ -48,7 +48,7 @@ public class ResultFileStep extends ExecutorStep {
       currentResultsJson.put("connectors", scenario.getSpec().toConnectorsInJson());
       var resultsJson = getJsonResults(executionQueue);
       resultsJson.getJsonArray("results").add(currentResultsJson);
-      fileProvider.writeToFile(executionQueue.getSpec().getResultFile(), resultsJson.encode());
+      fileProvider.writeToFile(executionQueue.getSpec().getResultFile(), resultsJson.encode(), "application/json");
     } else {
       logger.warn("No results found for {}", executionQueueItem.getResultFile());
     }

@@ -19,6 +19,8 @@ spec:
         properties:
           spec:
             properties:
+              appContainerName:
+                type: string
               envs:
                 items:
                   properties:
@@ -68,6 +70,8 @@ spec:
                       type: object
                   type: object
                 type: array
+              faultContainerName:
+                type: string
               selector:
                 properties:
                   matchExpressions:

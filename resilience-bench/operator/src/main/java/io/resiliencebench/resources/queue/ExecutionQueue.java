@@ -13,7 +13,7 @@ import java.util.Optional;
 @ShortNames("eq")
 @Plural("queues")
 @Kind("Queue")
-public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, ExecutionQueueStatus> implements Namespaced {
+public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, Void> implements Namespaced {
   ExecutionQueue() { }
 
   public ExecutionQueue(ExecutionQueueSpec spec, ObjectMeta meta) {

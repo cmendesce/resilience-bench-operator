@@ -5,29 +5,27 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.resiliencebench.resources.queue.ExecutionQueue;
-import io.resiliencebench.resources.queue.ExecutionQueueItem;
-import io.resiliencebench.resources.queue.ExecutionQueueStatus;
 import io.resiliencebench.resources.scenario.Scenario;
 import io.resiliencebench.support.CustomResourceRepository;
+import io.resiliencebench.execution.BenchmarkStatusUpdater;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
-import static io.resiliencebench.resources.queue.ExecutionQueueItem.Status.*;
 import static java.time.Duration.ofSeconds;
-import static java.time.ZoneId.*;
-import static java.util.stream.Collectors.*;
 
 @Service
 public class UpdateStatusQueueStep extends ExecutorStep {
 
   private final CustomResourceRepository<ExecutionQueue> executionRepository;
+  private final BenchmarkStatusUpdater statusUpdater;
 
   private final RetryConfig retryConfig;
 
-  public UpdateStatusQueueStep(KubernetesClient kubernetesClient, CustomResourceRepository<ExecutionQueue> executionRepository) {
+  public UpdateStatusQueueStep(KubernetesClient kubernetesClient, 
+                              CustomResourceRepository<ExecutionQueue> executionRepository,
+                              BenchmarkStatusUpdater statusUpdater) {
     super(kubernetesClient);
     this.executionRepository = executionRepository;
+    this.statusUpdater = statusUpdater;
     this.retryConfig = RetryConfig
             .custom()
             .retryExceptions(KubernetesClientException.class)
@@ -44,36 +42,33 @@ public class UpdateStatusQueueStep extends ExecutorStep {
   private void updateQueueItem(String queueName, String scenarioName, String namespace) {
     var queue = executionRepository.get(namespace, queueName);
     var queueItem = queue.getItem(scenarioName);
-    var now = LocalDateTime.now().atZone(of("UTC")).toString();
     if (queueItem.isRunning()) {
-      queueItem.setStatus(FINISHED);
-      queueItem.setFinishedAt(now);
+      queueItem.markAsCompleted();
     } else if (queueItem.isPending()) {
-      queueItem.setStatus(RUNNING);
-      queueItem.setStartedAt(now);
+      queueItem.markAsRunning();
     }
 
     queue.getMetadata().setNamespace(namespace);
     executionRepository.update(queue);
-    queue.setStatus(creteStatus(queue));
-    executionRepository.updateStatus(queue);
-  }
-
-  private static ExecutionQueueStatus creteStatus(ExecutionQueue queue) {
-    var statusCounts = queue.getSpec().getItems().stream().collect(groupingBy(ExecutionQueueItem::getStatus, counting()));
-    return new ExecutionQueueStatus(
-            statusCounts.getOrDefault(RUNNING, 0L),
-            statusCounts.getOrDefault(PENDING, 0L),
-            statusCounts.getOrDefault(FINISHED, 0L)
-    );
   }
 
   @Override
   public void internalExecute(Scenario scenario, ExecutionQueue executionQueue) {
+    var benchmarkName = executionQueue.getMetadata().getName();
+    var scenarioName = scenario.getMetadata().getName();
+    var namespace = scenario.getMetadata().getNamespace();
     Retry.of("updateQueueItem", retryConfig)
-            .executeRunnable(() ->
-                    updateQueueItem(executionQueue.getMetadata().getName(), scenario.getMetadata().getName(), scenario.getMetadata().getNamespace())
-            );
+            .executeRunnable(() -> updateStatus(benchmarkName, scenarioName, namespace));
+  }
 
+  private void updateStatus(String benchmarkName, String scenarioName, String namespace) {
+    updateQueueItem(benchmarkName, scenarioName, namespace);
+    var queue = executionRepository.get(namespace, benchmarkName);
+    var queueItem = queue.getItem(scenarioName);
+    if (queueItem.isRunning()) {
+        statusUpdater.markScenarioAsStarted(namespace, benchmarkName, scenarioName);
+    } else if (queueItem.isFinished()) {
+        statusUpdater.markScenarioAsCompleted(namespace, benchmarkName, scenarioName);
+    }
   }
 }

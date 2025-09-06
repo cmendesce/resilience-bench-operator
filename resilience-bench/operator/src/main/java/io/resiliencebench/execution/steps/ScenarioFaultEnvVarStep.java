@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static io.resiliencebench.support.Annotations.CONTAINER;
-
 @Service
 public class ScenarioFaultEnvVarStep extends EnvironmentStep {
   private final static Logger logger = LoggerFactory.getLogger(ScenarioFaultEnvVarStep.class);
@@ -50,7 +48,7 @@ public class ScenarioFaultEnvVarStep extends EnvironmentStep {
 
     if (deployment.isPresent()) {
       var targetDeployment = deployment.get();
-      var containerName = resilientService.getMetadata().getAnnotations().get(CONTAINER);
+      var containerName = resilientService.getSpec().getFaultContainerName();
       var containerEnvs = getActualContainerEnv(targetDeployment, containerName);
       containerEnvs.removeIf(env -> env != null && "FAULT_PERCENTAGE".equals(env.getName()));
       containerEnvs.add(

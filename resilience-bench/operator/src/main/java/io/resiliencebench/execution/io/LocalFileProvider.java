@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.Optional;
 
 import static java.util.Optional.empty;
@@ -23,6 +27,21 @@ public class LocalFileProvider implements FileProvider {
       outputStream.write(content.getBytes());
     } catch (IOException e) {
       logger.warn("Error writing file {}. {}", resultFile, e.getMessage());
+    }
+  }
+
+  @Override
+  public void writeToFile(String resultFile, String content, String contentType) {
+    this.writeToFile(resultFile, content);
+    try {
+      var view = Files.getFileAttributeView(Path.of(resultFile),
+              UserDefinedFileAttributeView.class);
+
+      view.write("Content-Type",
+              StandardCharsets.UTF_8.encode(contentType));
+
+    } catch (IOException e) {
+      logger.warn("Error adding content-type to file {}. {}", resultFile, e.getMessage());
     }
   }
 
