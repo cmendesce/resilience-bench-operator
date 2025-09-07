@@ -12,6 +12,11 @@ public class ListExpansionTest {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
+  public void should_not_instantiate() {
+    Assertions.assertThrows(IllegalStateException.class, () -> new ListExpansion());
+  }
+
+  @Test
   public void should_expand_template_as_patternConfig() {
     NameValueProperties configTemplate = new NameValueProperties();
 

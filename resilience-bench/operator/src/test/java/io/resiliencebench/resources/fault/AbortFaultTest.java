@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AbortFaultTest {
 
     @ParameterizedTest
-    @ValueSource(ints = {400, 401, 403, 404, 500, 502, 503})
+    @ValueSource(ints = {100, 400, 401, 403, 404, 500, 502, 503, 599})
     void shouldCreateAbortFaultWithDifferentStatusCodes(int statusCode) {
         var fault = new AbortFault(statusCode);
         assertEquals("abort-" + statusCode, fault.toString());
@@ -18,7 +18,8 @@ class AbortFaultTest {
 
     @Test
     void shouldHandleInvalidStatusCodes() {
-        assertThrows(IllegalArgumentException.class, () -> new AbortFault(0));
-        assertThrows(IllegalArgumentException.class, () -> new AbortFault(-1));
+        assertThrows(IllegalArgumentException.class, () -> new AbortFault(99));
+        assertThrows(IllegalArgumentException.class, () -> new AbortFault(600));
+
     }
 }
