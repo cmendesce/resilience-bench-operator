@@ -31,8 +31,8 @@ public class ListExpansionTest {
   public void should_expand_simple_template_as_patternConfig() {
     NameValueProperties configTemplate = new NameValueProperties();
 
-    configTemplate.add(new NameValueProperties.Attribute("slowCallRateThreshold",100));
-    configTemplate.add(new NameValueProperties.Attribute("slowCallDurationThreshold",1000));
+    configTemplate.add(new NameValueProperties.Attribute("slowCallRateThreshold", 100));
+    configTemplate.add(new NameValueProperties.Attribute("slowCallDurationThreshold", 1000));
     configTemplate.add(new NameValueProperties.Attribute("waitDurationInOpenState", 200));
 
     var expandedConfigs = ListExpansion.expandConfigTemplate(configTemplate);

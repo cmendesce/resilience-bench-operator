@@ -58,12 +58,12 @@ public class IstioTimeoutStep extends IstioExecutorStep {
   }
 
   private Optional<String> createTimeoutPolicy(Map<String, Object> patternConfig) {
-      var timeout = (Integer) patternConfig.get("timeout");
-      if (timeout != null && timeout >= 0) {
-        return of(timeout + "ms");
-      } else {
-        logger.error("Timeout not configured. Attempts and perTryTimeout are required for retry pattern configuration.");
-        return empty();
-      }
+    var timeout = (Integer) patternConfig.get("timeout");
+    if (timeout != null && timeout >= 0) {
+      return of(timeout + "ms");
+    } else {
+      logger.error("Timeout not configured. Attempts and perTryTimeout are required for retry pattern configuration.");
+      return empty();
+    }
   }
 }

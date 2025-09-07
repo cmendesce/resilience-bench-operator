@@ -62,16 +62,16 @@ public class IstioCircuitBreakerStep extends IstioExecutorStep {
     /**
      *
      * connectionPool:
-*       tcp:
-*         maxConnections: 1
-*       http:
-*         http1MaxPendingRequests: 1
-*         maxRequestsPerConnection: 1
-*     outlierDetection:
-*       consecutive5xxErrors: 1
-*       interval: 1s
-*       baseEjectionTime: 3m
-*       maxEjectionPercent: 100
+     *       tcp:
+     *         maxConnections: 1
+     *       http:
+     *         http1MaxPendingRequests: 1
+     *         maxRequestsPerConnection: 1
+     *     outlierDetection:
+     *       consecutive5xxErrors: 1
+     *       interval: 1s
+     *       baseEjectionTime: 3m
+     *       maxEjectionPercent: 100
      */
 
 //    var  createCircuitBreakerPolicy(connector.getIstio().getCircuitBreaker());

@@ -12,7 +12,7 @@ public class BenchmarkStatus {
 
   @PrinterColumn(name = "Phase", priority = 0)
   private String phase;
-  
+
   @PrinterColumn(name = "Execution Queue", priority = 1)
   private String executionQueueName;
 

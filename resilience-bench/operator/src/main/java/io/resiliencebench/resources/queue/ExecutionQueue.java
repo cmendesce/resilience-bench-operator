@@ -14,7 +14,8 @@ import java.util.Optional;
 @Plural("queues")
 @Kind("Queue")
 public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, ExecutionQueueStatus> implements Namespaced {
-  ExecutionQueue() { }
+  ExecutionQueue() {
+  }
 
   public ExecutionQueue(ExecutionQueueSpec spec, ObjectMeta meta) {
     this.spec = spec;
@@ -26,8 +27,8 @@ public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, Execution
     if (this.status == null && this.spec != null && this.spec.getItems() != null) {
       var executionId =
               this.getMetadata().getLabels() != null && !this.getMetadata().getLabels().isEmpty()
-          ? this.getMetadata().getLabels().get("execution-id") 
-          : "exec-" + System.currentTimeMillis();
+                      ? this.getMetadata().getLabels().get("execution-id")
+                      : "exec-" + System.currentTimeMillis();
       this.status = new ExecutionQueueStatus(this.spec.getItems().size(), executionId);
     }
   }
@@ -52,13 +53,13 @@ public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, Execution
     if (this.status == null) {
       initializeStatus();
     }
-    
+
     if (this.status != null && this.spec != null && this.spec.getItems() != null) {
       var items = this.spec.getItems();
       var running = (int) items.stream().filter(ExecutionQueueItem::isRunning).count();
       var completed = (int) items.stream().filter(ExecutionQueueItem::isFinished).count();
       var pending = (int) items.stream().filter(ExecutionQueueItem::isPending).count();
-      
+
       this.status.updateProgress(running, completed, pending);
       this.status.updateReconcileTime();
     }

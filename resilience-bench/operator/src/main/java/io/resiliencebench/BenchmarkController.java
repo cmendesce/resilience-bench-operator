@@ -20,20 +20,20 @@ import java.util.List;
 @ControllerConfiguration
 public class BenchmarkController implements Reconciler<Benchmark> {
 
-    private static final Logger logger = LoggerFactory.getLogger(BenchmarkController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BenchmarkController.class);
 
-    private final CustomResourceRepository<Scenario> scenarioRepository;
-    private final CustomResourceRepository<Workload> workloadRepository;
-    private final CustomResourceRepository<ExecutionQueue> queueRepository;
+  private final CustomResourceRepository<Scenario> scenarioRepository;
+  private final CustomResourceRepository<Workload> workloadRepository;
+  private final CustomResourceRepository<ExecutionQueue> queueRepository;
 
-    public BenchmarkController(
-            CustomResourceRepository<Scenario> scenarioRepository,
-            CustomResourceRepository<Workload> workloadRepository,
-            CustomResourceRepository<ExecutionQueue> queueRepository) {
-        this.scenarioRepository = scenarioRepository;
-        this.workloadRepository = workloadRepository;
-        this.queueRepository = queueRepository;
-    }
+  public BenchmarkController(
+          CustomResourceRepository<Scenario> scenarioRepository,
+          CustomResourceRepository<Workload> workloadRepository,
+          CustomResourceRepository<ExecutionQueue> queueRepository) {
+    this.scenarioRepository = scenarioRepository;
+    this.workloadRepository = workloadRepository;
+    this.queueRepository = queueRepository;
+  }
 
   @Override
   public UpdateControl<Benchmark> reconcile(Benchmark benchmark, Context<Benchmark> context) {
@@ -47,8 +47,8 @@ public class BenchmarkController implements Reconciler<Benchmark> {
       var currentGeneration = benchmark.getMetadata().getGeneration();
 
       if (currentStatus != null &&
-          currentStatus.isCompleted() &&
-          !currentStatus.needsReconciliation(currentGeneration)) {
+              currentStatus.isCompleted() &&
+              !currentStatus.needsReconciliation(currentGeneration)) {
         logger.info("Benchmark {} is already completed and no spec changes detected, skipping reconciliation", benchmarkName);
         currentStatus.updateReconcileTime();
         return UpdateControl.updateStatus(benchmark);
@@ -100,7 +100,7 @@ public class BenchmarkController implements Reconciler<Benchmark> {
       var newStatus = new BenchmarkStatus(queueName);
       newStatus.setObservedGeneration(currentGeneration);
       logger.info("Created new status for benchmark {} with execution queue {}",
-                 benchmark.getMetadata().getName(), queueName);
+              benchmark.getMetadata().getName(), queueName);
       return newStatus;
     } else {
       currentStatus.updateReconcileTime();

@@ -18,18 +18,18 @@ public class EnvironmentStep extends AbstractEnvironmentStep {
   private final static Logger logger = LoggerFactory.getLogger(EnvironmentStep.class);
 
   public EnvironmentStep(KubernetesClient kubernetesClient,
-      CustomResourceRepository<ResilientService> resilientServiceRepository) {
+                         CustomResourceRepository<ResilientService> resilientServiceRepository) {
     super(kubernetesClient, resilientServiceRepository);
   }
 
   @Override
   protected boolean isApplicable(Scenario scenario) {
     return scenario
-        .getSpec()
-        .getConnectors()
-        .stream()
-        .anyMatch(connector -> connector.getDestination().getEnvs() != null ||
-            connector.getSource().getEnvs() != null);
+            .getSpec()
+            .getConnectors()
+            .stream()
+            .anyMatch(connector -> connector.getDestination().getEnvs() != null ||
+                    connector.getSource().getEnvs() != null);
   }
 
   public void applyServiceEnvironment(Scenario scenario, io.resiliencebench.resources.scenario.Service service) {
@@ -41,14 +41,14 @@ public class EnvironmentStep extends AbstractEnvironmentStep {
     var containerName = resilientService.getSpec().getAppContainerName();
 
     var deployment = kubernetesClient()
-        .apps()
-        .deployments()
-        .inNamespace(scenario.getMetadata().getNamespace())
-        .withLabelSelector(resilientService.getSpec().getSelector())
-        .list()
-        .getItems()
-        .stream()
-        .findFirst();
+            .apps()
+            .deployments()
+            .inNamespace(scenario.getMetadata().getNamespace())
+            .withLabelSelector(resilientService.getSpec().getSelector())
+            .list()
+            .getItems()
+            .stream()
+            .findFirst();
 
     if (deployment.isPresent()) {
       var targetDeployment = deployment.get();
@@ -59,10 +59,10 @@ public class EnvironmentStep extends AbstractEnvironmentStep {
         var newValue = env.get(variable.getName());
         if (newValue != null) {
           logger.info("deployment {} container {}. envVar {}={}",
-              deployment.get().getMetadata().getName(),
-              containerName,
-              variable.getName(),
-              newValue);
+                  deployment.get().getMetadata().getName(),
+                  containerName,
+                  variable.getName(),
+                  newValue);
 
           variable.setValue(newValue.asText());
         }

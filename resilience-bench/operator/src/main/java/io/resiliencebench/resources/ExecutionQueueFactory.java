@@ -35,7 +35,7 @@ public class ExecutionQueueFactory {
             s.getMetadata().getName(), itemResultsFile.formatted(s.getMetadata().getName()))
     ).toList();
     var spec = new ExecutionQueueSpec(
-            Paths.get(now,  "results.json").toString(),
+            Paths.get(now, "results.json").toString(),
             items,
             benchmark.getMetadata().getNamespace()
     );

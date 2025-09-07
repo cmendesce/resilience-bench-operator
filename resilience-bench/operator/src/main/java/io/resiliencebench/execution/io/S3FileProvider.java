@@ -30,7 +30,7 @@ public class S3FileProvider implements FileProvider {
     this.s3Client = s3Client;
   }
 
-   private void internalWriteFile(String resultFile, String content, String contentType) {
+  private void internalWriteFile(String resultFile, String content, String contentType) {
     try {
       var contentBytes = content.getBytes(UTF_8);
       InputStream inputStream = new ByteArrayInputStream(contentBytes);
@@ -69,8 +69,7 @@ public class S3FileProvider implements FileProvider {
     } catch (AmazonServiceException e) {
       logger.warn("Error reading file {}. Error code: {}. Message: {}", resultFile, e.getErrorCode(), e.getErrorMessage());
       return empty();
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       logger.warn("Error reading file {}. {}", resultFile, e.getMessage());
       return empty();
     }

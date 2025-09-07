@@ -126,8 +126,8 @@ public class ScenarioFactoryTest {
   public void should_create_executions_with_multiple_workloads_and_connectors() {
     var spec = new BenchmarkSpec("workload",
             of(new ScenarioTemplate("scenario-1", of(
-                    createConnector("connector-1"),
-                    createConnector("connector-2"))
+                            createConnector("connector-1"),
+                            createConnector("connector-2"))
                     )
             )
     );

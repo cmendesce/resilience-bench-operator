@@ -30,12 +30,14 @@ public class OperatorConfiguration {
   private KubernetesClient kubernetesClient;
   private IstioClient istioClient;
 
-  @Bean KubernetesClient kubernetesClient() {
+  @Bean
+  KubernetesClient kubernetesClient() {
     kubernetesClient = new KubernetesClientBuilder().build();
     return kubernetesClient;
   }
 
-  @Bean IstioClient istioClient(KubernetesClient kubernetesClient) {
+  @Bean
+  IstioClient istioClient(KubernetesClient kubernetesClient) {
     istioClient = new DefaultIstioClient(kubernetesClient);
     return istioClient;
   }
@@ -64,27 +66,33 @@ public class OperatorConfiguration {
     return operator;
   }
 
-  @Bean CustomResourceRepository<Scenario> scenarioRepository(KubernetesClient kubernetesClient) {
+  @Bean
+  CustomResourceRepository<Scenario> scenarioRepository(KubernetesClient kubernetesClient) {
     return new CustomResourceRepository<>(kubernetesClient, Scenario.class);
   }
 
-  @Bean CustomResourceRepository<ExecutionQueue> executionRepository(KubernetesClient kubernetesClient) {
+  @Bean
+  CustomResourceRepository<ExecutionQueue> executionRepository(KubernetesClient kubernetesClient) {
     return new CustomResourceRepository<>(kubernetesClient, ExecutionQueue.class);
   }
 
-  @Bean CustomResourceRepository<Workload> workloadRepository(KubernetesClient kubernetesClient) {
+  @Bean
+  CustomResourceRepository<Workload> workloadRepository(KubernetesClient kubernetesClient) {
     return new CustomResourceRepository<>(kubernetesClient, Workload.class);
   }
 
-  @Bean CustomResourceRepository<Benchmark> benchmarkRepository(KubernetesClient kubernetesClient) {
+  @Bean
+  CustomResourceRepository<Benchmark> benchmarkRepository(KubernetesClient kubernetesClient) {
     return new CustomResourceRepository<>(kubernetesClient, Benchmark.class);
   }
 
-  @Bean CustomResourceRepository<ResilientService> resilientServiceRepository(KubernetesClient kubernetesClient) {
+  @Bean
+  CustomResourceRepository<ResilientService> resilientServiceRepository(KubernetesClient kubernetesClient) {
     return new CustomResourceRepository<>(kubernetesClient, ResilientService.class);
   }
 
-  @Bean RestTemplate restTemplate() {
+  @Bean
+  RestTemplate restTemplate() {
     return new RestTemplate();
   }
 }

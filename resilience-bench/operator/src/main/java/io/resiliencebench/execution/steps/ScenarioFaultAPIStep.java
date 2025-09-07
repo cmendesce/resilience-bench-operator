@@ -15,11 +15,11 @@ import static io.resiliencebench.support.Annotations.ENVOY_PORT;
 import static io.resiliencebench.support.Annotations.ENVOY_SERVICE;
 
 @Service
- public class ScenarioFaultAPIStep extends AbstractEnvironmentStep {
+public class ScenarioFaultAPIStep extends AbstractEnvironmentStep {
 
   private final static Logger logger = LoggerFactory.getLogger(ScenarioFaultAPIStep.class);
   private final RestTemplate restTemplate;
-  
+
   public ScenarioFaultAPIStep(KubernetesClient kubernetesClient,
                               CustomResourceRepository<ResilientService> resilientServiceRepository,
                               RestTemplate restTemplate) {

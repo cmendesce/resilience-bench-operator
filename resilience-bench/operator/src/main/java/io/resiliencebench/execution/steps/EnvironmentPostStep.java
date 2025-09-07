@@ -18,18 +18,18 @@ public class EnvironmentPostStep extends AbstractEnvironmentStep {
   private final static Logger logger = LoggerFactory.getLogger(EnvironmentPostStep.class);
 
   public EnvironmentPostStep(KubernetesClient kubernetesClient,
-      CustomResourceRepository<ResilientService> resilientServiceRepository) {
+                             CustomResourceRepository<ResilientService> resilientServiceRepository) {
     super(kubernetesClient, resilientServiceRepository);
   }
 
   @Override
   protected boolean isApplicable(Scenario scenario) {
     return scenario
-        .getSpec()
-        .getConnectors()
-        .stream()
-        .anyMatch(connector -> connector.getDestination().getEnvs() != null ||
-            connector.getSource().getEnvs() != null);
+            .getSpec()
+            .getConnectors()
+            .stream()
+            .anyMatch(connector -> connector.getDestination().getEnvs() != null ||
+                    connector.getSource().getEnvs() != null);
   }
 
   @Override
@@ -51,9 +51,9 @@ public class EnvironmentPostStep extends AbstractEnvironmentStep {
     var deployment = findDeployment(scenario, resilientService);
     if (deployment.isPresent()) {
       var container = deployment.get().getSpec().getTemplate().getSpec().getContainers().stream()
-          .filter(c -> c.getName().equals(containerName))
-          .findFirst()
-          .orElseThrow(() -> new RuntimeException("Container not found: " + containerName));
+              .filter(c -> c.getName().equals(containerName))
+              .findFirst()
+              .orElseThrow(() -> new RuntimeException("Container not found: " + containerName));
 
       var textEnvs = String.join(" ", env.stream().map((variable) -> "\"" + variable.getName() + "\": \"" + variable.getValue() + "\"").toList());
       logger.info("deployment {} container {}. {}", deployment.get().getMetadata().getName(), containerName, textEnvs);
@@ -68,14 +68,14 @@ public class EnvironmentPostStep extends AbstractEnvironmentStep {
 
   private Optional<Deployment> findDeployment(Scenario scenario, ResilientService resilientService) {
     var deployment = kubernetesClient()
-        .apps()
-        .deployments()
-        .inNamespace(scenario.getMetadata().getNamespace())
-        .withLabelSelector(resilientService.getSpec().getSelector())
-        .list()
-        .getItems()
-        .stream()
-        .findFirst();
+            .apps()
+            .deployments()
+            .inNamespace(scenario.getMetadata().getNamespace())
+            .withLabelSelector(resilientService.getSpec().getSelector())
+            .list()
+            .getItems()
+            .stream()
+            .findFirst();
     return deployment;
   }
 }

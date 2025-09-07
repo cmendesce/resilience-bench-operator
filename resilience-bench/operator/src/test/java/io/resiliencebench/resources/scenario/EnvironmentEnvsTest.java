@@ -59,7 +59,7 @@ class EnvironmentEnvsTest {
   }
 
   @ParameterizedTest(name = "pattern parameter w/ long: {0}")
-  @ValueSource(longs = {0l, 1l, 100l, 1000l, -1l, Long.MAX_VALUE, Long.MIN_VALUE})
+  @ValueSource(longs = {0L, 1L, 100L, 1000L, -1L, Long.MAX_VALUE, Long.MIN_VALUE})
   void testWithInteger(long value) {
     Map<String, Object> patternConfig = new HashMap<>();
     String key = "test";

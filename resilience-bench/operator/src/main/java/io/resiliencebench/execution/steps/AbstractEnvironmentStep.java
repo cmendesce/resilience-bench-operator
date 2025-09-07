@@ -24,22 +24,22 @@ abstract class AbstractEnvironmentStep extends ExecutorStep {
   protected final CustomResourceRepository<ResilientService> resilientServiceRepository;
 
   public AbstractEnvironmentStep(KubernetesClient kubernetesClient,
-      CustomResourceRepository<ResilientService> resilientServiceRepository) {
+                                 CustomResourceRepository<ResilientService> resilientServiceRepository) {
     super(kubernetesClient);
     this.resilientServiceRepository = resilientServiceRepository;
   }
 
   protected Deployment getDeployment(Scenario scenario, ResilientService resilientService) {
     return kubernetesClient()
-        .apps()
-        .deployments()
-        .inNamespace(scenario.getMetadata().getNamespace())
-        .withLabelSelector(resilientService.getSpec().getSelector())
-        .list()
-        .getItems()
-        .stream()
-        .findFirst()
-        .orElse(null);
+            .apps()
+            .deployments()
+            .inNamespace(scenario.getMetadata().getNamespace())
+            .withLabelSelector(resilientService.getSpec().getSelector())
+            .list()
+            .getItems()
+            .stream()
+            .findFirst()
+            .orElse(null);
   }
 
   private void internalUpdateVariablesDeployment(Deployment targetDeployment, String containerName, List<EnvVar> envVars) {
@@ -78,19 +78,19 @@ abstract class AbstractEnvironmentStep extends ExecutorStep {
 
   protected List<EnvVar> getActualContainerEnv(Deployment targetDeployment, String containerName) {
     return targetDeployment.getSpec().getTemplate().getSpec().getContainers().stream()
-        .filter(c -> c.getName().equals(containerName))
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("Container not found: " + containerName))
-        .getEnv();
+            .filter(c -> c.getName().equals(containerName))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Container not found: " + containerName))
+            .getEnv();
   }
 
   public FilterWatchListDeletable<Pod, PodList, PodResource> getPods(Deployment targetDeployment) {
     return kubernetesClient().pods()
-        .inNamespace(targetDeployment.getMetadata().getNamespace())
-        .withLabel("app", targetDeployment.getMetadata().getName());
+            .inNamespace(targetDeployment.getMetadata().getNamespace())
+            .withLabel("app", targetDeployment.getMetadata().getName());
   }
 
-   /**
+  /**
    * Test if the pod is ready, if yes return true, otherwise return false
    */
   public boolean waitUntilCondition(Pod pod) {

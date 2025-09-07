@@ -20,9 +20,9 @@ public class UpdateStatusQueueStep extends ExecutorStep {
 
   private final RetryConfig retryConfig;
 
-  public UpdateStatusQueueStep(KubernetesClient kubernetesClient, 
-                              CustomResourceRepository<ExecutionQueue> executionRepository,
-                              ExecutionQueueStatusUpdater statusUpdater) {
+  public UpdateStatusQueueStep(KubernetesClient kubernetesClient,
+                               CustomResourceRepository<ExecutionQueue> executionRepository,
+                               ExecutionQueueStatusUpdater statusUpdater) {
     super(kubernetesClient);
     this.executionRepository = executionRepository;
     this.statusUpdater = statusUpdater;
@@ -66,9 +66,9 @@ public class UpdateStatusQueueStep extends ExecutorStep {
     var queue = executionRepository.get(namespace, queueName);
     var queueItem = queue.getItem(scenarioName);
     if (queueItem.isPending()) {
-        statusUpdater.markScenarioAsStarted(namespace, queueName, scenarioName);
+      statusUpdater.markScenarioAsStarted(namespace, queueName, scenarioName);
     } else if (queueItem.isFinished()) {
-        statusUpdater.markScenarioAsCompleted(namespace, queueName, scenarioName);
+      statusUpdater.markScenarioAsCompleted(namespace, queueName, scenarioName);
     }
   }
 }

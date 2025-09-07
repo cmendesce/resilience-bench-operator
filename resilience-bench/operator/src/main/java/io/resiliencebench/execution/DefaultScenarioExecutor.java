@@ -53,12 +53,12 @@ public class DefaultScenarioExecutor implements ScenarioExecutor {
     executePreparationSteps(scenario, executionQueue);
     var executionQueueItem = executionQueue.getItem(scenario.getMetadata().getName());
     var job = k6JobFactory.create(scenario, workload, executionQueueItem);
-    
+
     // Add execution ID label for tracking
     if (executionQueue.getMetadata().getLabels().containsKey("execution-id")) {
       job.getMetadata().getLabels().put(EXECUTION_ID, executionQueue.getMetadata().getLabels().get("execution-id"));
     }
-    
+
     var jobsClient = kubernetesClient.batch().v1().jobs();
     jobsClient.inNamespace(job.getMetadata().getNamespace()).withName(job.getMetadata().getName()).delete();
     jobsClient.resource(job).create();
@@ -78,6 +78,7 @@ public class DefaultScenarioExecutor implements ScenarioExecutor {
           executePostExecutionSteps(scenario, executionQueue);
         }
       }
+
       @Override
       public void onClose(WatcherException cause) {
         logger.info("Job watcher closed", cause); // TODO pesquisar sobre o evento de close

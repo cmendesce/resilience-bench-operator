@@ -15,7 +15,7 @@ public class ScenarioFaultEnvVarStep extends EnvironmentStep {
   private final static Logger logger = LoggerFactory.getLogger(ScenarioFaultEnvVarStep.class);
 
   public ScenarioFaultEnvVarStep(KubernetesClient kubernetesClient,
-                           CustomResourceRepository<ResilientService> resilientServiceRepository) {
+                                 CustomResourceRepository<ResilientService> resilientServiceRepository) {
     super(kubernetesClient, resilientServiceRepository);
   }
 

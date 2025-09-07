@@ -20,6 +20,7 @@ public class Service {
   public Service(String name) {
     this.name = name;
   }
+
   public Service(String name, Map<String, Object> envs) {
     this(name);
     this.envs = toJsonMap(envs);

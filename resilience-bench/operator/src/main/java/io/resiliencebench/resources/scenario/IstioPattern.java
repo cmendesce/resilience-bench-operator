@@ -20,7 +20,8 @@ public class IstioPattern {
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
   private Map<String, JsonNode> circuitBreaker;
 
-  public IstioPattern() { }
+  public IstioPattern() {
+  }
 
   public IstioPattern(Map<String, Object> retry, Map<String, Object> timeout, Map<String, Object> circuitBreaker) {
     this.retry = toJsonMap(retry);

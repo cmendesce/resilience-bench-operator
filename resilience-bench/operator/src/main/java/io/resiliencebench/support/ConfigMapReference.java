@@ -7,8 +7,9 @@ public class ConfigMapReference {
   private String name;
   private String file;
 
-  public ConfigMapReference() {  }
-  
+  public ConfigMapReference() {
+  }
+
   public ConfigMapReference(String name, String file) {
     this.name = name;
     this.file = file;

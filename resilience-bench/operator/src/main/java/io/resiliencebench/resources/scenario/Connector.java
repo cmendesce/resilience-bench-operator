@@ -15,7 +15,8 @@ public class Connector {
   @Nullable
   private Fault fault;
 
-  public Connector() { }
+  public Connector() {
+  }
 
   public String getName() {
     return name;

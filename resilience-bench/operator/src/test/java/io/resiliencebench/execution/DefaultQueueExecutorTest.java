@@ -22,44 +22,44 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DefaultQueueExecutorTest {
 
-    @Mock
-    private CustomResourceRepository<Scenario> scenarioRepository;
+  @Mock
+  private CustomResourceRepository<Scenario> scenarioRepository;
 
-    @Mock
-    private ScenarioExecutor scenarioExecutor;
+  @Mock
+  private ScenarioExecutor scenarioExecutor;
 
-    private DefaultQueueExecutor executor;
+  private DefaultQueueExecutor executor;
 
-    @BeforeEach
-    void setUp() {
-        executor = new DefaultQueueExecutor(scenarioRepository, scenarioExecutor);
-    }
+  @BeforeEach
+  void setUp() {
+    executor = new DefaultQueueExecutor(scenarioRepository, scenarioExecutor);
+  }
 
-    @Test
-    void shouldExecuteNextPendingItem() {
-        // Given
-        var scenario = new Scenario();
-        scenario.setMetadata(new ObjectMetaBuilder().withName("test-scenario").build());
-        
-        var item = new ExecutionQueueItem("test-scenario", "result.json");
-        var queue = createQueueWithItems(item);
-        
-        when(scenarioRepository.find(eq("test-namespace"), eq("test-scenario")))
-                .thenReturn(Optional.of(scenario));
+  @Test
+  void shouldExecuteNextPendingItem() {
+    // Given
+    var scenario = new Scenario();
+    scenario.setMetadata(new ObjectMetaBuilder().withName("test-scenario").build());
 
-        // When
-        executor.execute(queue);
+    var item = new ExecutionQueueItem("test-scenario", "result.json");
+    var queue = createQueueWithItems(item);
 
-        // Then
-        verify(scenarioExecutor).execute(eq(scenario), eq(queue));
-    }
+    when(scenarioRepository.find(eq("test-namespace"), eq("test-scenario")))
+            .thenReturn(Optional.of(scenario));
 
-    private ExecutionQueue createQueueWithItems(ExecutionQueueItem... items) {
-        var meta = new ObjectMetaBuilder()
-                .withName("test-queue")
-                .withNamespace("test-namespace")
-                .build();
-        var spec = new ExecutionQueueSpec("results.json", List.of(items), "test-benchmark");
-        return new ExecutionQueue(spec, meta);
-    }
+    // When
+    executor.execute(queue);
+
+    // Then
+    verify(scenarioExecutor).execute(eq(scenario), eq(queue));
+  }
+
+  private ExecutionQueue createQueueWithItems(ExecutionQueueItem... items) {
+    var meta = new ObjectMetaBuilder()
+            .withName("test-queue")
+            .withNamespace("test-namespace")
+            .build();
+    var spec = new ExecutionQueueSpec("results.json", List.of(items), "test-benchmark");
+    return new ExecutionQueue(spec, meta);
+  }
 } 
