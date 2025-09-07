@@ -28,12 +28,13 @@ public class ExecutionQueueController implements Reconciler<ExecutionQueue> {
   public UpdateControl<ExecutionQueue> reconcile(ExecutionQueue queue, Context<ExecutionQueue> context) {
     logger.info("Reconciling ExecutionQueue: {}", queue.getMetadata().getName());
 
-    // Initialize status if needed
-    if (queue.getStatus() == null) {
+    if (queue.getStatus() == null) { // first time reconciliation
+      logger.info("Initializing status for ExecutionQueue: {}", queue.getMetadata().getName());
+      queueExecutor.execute(queue);
       queue.updateStatusFromItems();
+      return UpdateControl.updateStatus(queue);
     }
 
-    // Update status based on current items state
     statusUpdater.updateQueueProgress(queue.getMetadata().getNamespace(), queue.getMetadata().getName());
 
     if (queue.isDone()) {
