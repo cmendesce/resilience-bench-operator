@@ -66,10 +66,9 @@ public class BenchmarkController implements Reconciler<Benchmark> {
         return updateStatusWithError(benchmark, "No scenarios generated");
       }
 
-      createQueue(benchmark, scenariosList);
-
       var status = createOrUpdateStatus(benchmark, benchmarkName);
       benchmark.setStatus(status);
+      createQueue(benchmark, scenariosList);
 
       logger.info("Benchmark reconciled {}. {} scenarios created", benchmarkName, scenariosList.size());
 
