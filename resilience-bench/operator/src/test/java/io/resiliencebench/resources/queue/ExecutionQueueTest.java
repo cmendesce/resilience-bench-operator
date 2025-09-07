@@ -5,8 +5,10 @@ import io.resiliencebench.resources.Phase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExecutionQueueTest {
@@ -214,16 +216,12 @@ class ExecutionQueueTest {
     queue = new ExecutionQueue(spec, meta);
     var initialReconcileTime = queue.getStatus().getLastReconcileTime();
 
-    // Sleep a bit to ensure time difference
-    try {
-      Thread.sleep(10);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-
-    queue.updateStatusFromItems();
-
-    assertNotEquals(initialReconcileTime, queue.getStatus().getLastReconcileTime());
+    // Use Awaitility para aguardar condições
+    await().atMost(Duration.ofSeconds(1))
+            .until(() -> {
+              queue.updateStatusFromItems();
+              return !queue.getStatus().getLastReconcileTime().equals(initialReconcileTime);
+            });
   }
 
   @Test
