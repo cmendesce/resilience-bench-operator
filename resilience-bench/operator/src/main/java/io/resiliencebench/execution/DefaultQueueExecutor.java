@@ -1,15 +1,14 @@
 package io.resiliencebench.execution;
 
-import static java.lang.String.format;
-
+import io.resiliencebench.resources.queue.ExecutionQueue;
 import io.resiliencebench.resources.queue.ExecutionQueueItem;
+import io.resiliencebench.resources.scenario.Scenario;
+import io.resiliencebench.support.CustomResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import io.resiliencebench.resources.queue.ExecutionQueue;
-import io.resiliencebench.resources.scenario.Scenario;
-import io.resiliencebench.support.CustomResourceRepository;
+import static java.lang.String.format;
 
 @Service
 public class DefaultQueueExecutor implements QueueExecutor {

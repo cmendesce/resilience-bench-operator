@@ -4,11 +4,9 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ControllerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
 import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
-import io.resiliencebench.execution.QueueExecutor;
 import io.resiliencebench.execution.ExecutionQueueStatusUpdater;
-import io.resiliencebench.resources.benchmark.Benchmark;
+import io.resiliencebench.execution.QueueExecutor;
 import io.resiliencebench.resources.queue.ExecutionQueue;
-import io.resiliencebench.support.CustomResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

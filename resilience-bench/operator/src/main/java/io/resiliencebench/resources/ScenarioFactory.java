@@ -8,7 +8,9 @@ import io.resiliencebench.resources.benchmark.ServiceTemplate;
 import io.resiliencebench.resources.scenario.*;
 import io.resiliencebench.resources.workload.Workload;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static io.resiliencebench.resources.ListExpansion.expandConfigTemplate;
 import static io.resiliencebench.support.Annotations.OWNED_BY;

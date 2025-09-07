@@ -1,9 +1,9 @@
 package io.resiliencebench.resources.service;
 
-import java.util.List;
-
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LabelSelector;
+
+import java.util.List;
 
 public class ResilientServiceSpec {
 

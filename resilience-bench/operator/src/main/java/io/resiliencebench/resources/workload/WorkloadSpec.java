@@ -8,7 +8,7 @@ import io.resiliencebench.resources.NameValueProperties;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class WorkloadSpec {
 

@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import static io.resiliencebench.support.Annotations.*;
+import static io.resiliencebench.support.Annotations.ENVOY_PORT;
+import static io.resiliencebench.support.Annotations.ENVOY_SERVICE;
 
 @Service
  public class ScenarioFaultAPIStep extends AbstractEnvironmentStep {

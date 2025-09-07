@@ -1,16 +1,17 @@
 package io.resiliencebench.resources;
 
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.resiliencebench.resources.benchmark.Benchmark;
+import io.resiliencebench.resources.queue.ExecutionQueue;
+import io.resiliencebench.resources.queue.ExecutionQueueItem;
+import io.resiliencebench.resources.queue.ExecutionQueueSpec;
+import io.resiliencebench.resources.scenario.Scenario;
+
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.resiliencebench.resources.benchmark.Benchmark;
-import io.resiliencebench.resources.queue.ExecutionQueue;
-import io.resiliencebench.resources.queue.ExecutionQueueSpec;
-import io.resiliencebench.resources.queue.ExecutionQueueItem;
-import io.resiliencebench.resources.scenario.Scenario;
 import static io.resiliencebench.support.Annotations.OWNED_BY;
 
 public class ExecutionQueueFactory {

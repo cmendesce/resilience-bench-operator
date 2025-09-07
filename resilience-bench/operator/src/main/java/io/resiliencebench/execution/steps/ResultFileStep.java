@@ -1,16 +1,15 @@
 package io.resiliencebench.execution.steps;
 
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.resiliencebench.execution.io.FileProvider;
 import io.resiliencebench.execution.io.FileProviderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.resiliencebench.resources.queue.ExecutionQueue;
 import io.resiliencebench.resources.scenario.Scenario;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ResultFileStep extends ExecutorStep {

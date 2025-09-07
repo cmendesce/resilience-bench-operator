@@ -2,8 +2,10 @@ package io.resiliencebench.resources.scenario;
 
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ScenarioFaultTest {
 

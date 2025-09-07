@@ -2,7 +2,6 @@ package io.resiliencebench.execution.steps.istio;
 
 import io.fabric8.istio.api.networking.v1beta1.VirtualService;
 import io.fabric8.istio.client.IstioClient;
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.resiliencebench.execution.steps.ExecutorStep;
 import io.resiliencebench.resources.service.ResilientService;

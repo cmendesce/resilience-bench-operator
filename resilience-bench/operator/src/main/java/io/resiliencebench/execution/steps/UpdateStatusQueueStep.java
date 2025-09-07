@@ -4,10 +4,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
+import io.resiliencebench.execution.ExecutionQueueStatusUpdater;
 import io.resiliencebench.resources.queue.ExecutionQueue;
 import io.resiliencebench.resources.scenario.Scenario;
 import io.resiliencebench.support.CustomResourceRepository;
-import io.resiliencebench.execution.ExecutionQueueStatusUpdater;
 import org.springframework.stereotype.Service;
 
 import static java.time.Duration.ofSeconds;
