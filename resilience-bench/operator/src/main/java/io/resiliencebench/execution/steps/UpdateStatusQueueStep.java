@@ -7,7 +7,7 @@ import io.github.resilience4j.retry.RetryConfig;
 import io.resiliencebench.resources.queue.ExecutionQueue;
 import io.resiliencebench.resources.scenario.Scenario;
 import io.resiliencebench.support.CustomResourceRepository;
-import io.resiliencebench.execution.BenchmarkStatusUpdater;
+import io.resiliencebench.execution.ExecutionQueueStatusUpdater;
 import org.springframework.stereotype.Service;
 
 import static java.time.Duration.ofSeconds;
@@ -16,13 +16,13 @@ import static java.time.Duration.ofSeconds;
 public class UpdateStatusQueueStep extends ExecutorStep {
 
   private final CustomResourceRepository<ExecutionQueue> executionRepository;
-  private final BenchmarkStatusUpdater statusUpdater;
+  private final ExecutionQueueStatusUpdater statusUpdater;
 
   private final RetryConfig retryConfig;
 
   public UpdateStatusQueueStep(KubernetesClient kubernetesClient, 
                               CustomResourceRepository<ExecutionQueue> executionRepository,
-                              BenchmarkStatusUpdater statusUpdater) {
+                              ExecutionQueueStatusUpdater statusUpdater) {
     super(kubernetesClient);
     this.executionRepository = executionRepository;
     this.statusUpdater = statusUpdater;
@@ -54,21 +54,21 @@ public class UpdateStatusQueueStep extends ExecutorStep {
 
   @Override
   public void internalExecute(Scenario scenario, ExecutionQueue executionQueue) {
-    var benchmarkName = executionQueue.getMetadata().getName();
+    var queueName = executionQueue.getMetadata().getName();
     var scenarioName = scenario.getMetadata().getName();
     var namespace = scenario.getMetadata().getNamespace();
     Retry.of("updateQueueItem", retryConfig)
-            .executeRunnable(() -> updateStatus(benchmarkName, scenarioName, namespace));
+            .executeRunnable(() -> updateStatus(queueName, scenarioName, namespace));
   }
 
-  private void updateStatus(String benchmarkName, String scenarioName, String namespace) {
-    updateQueueItem(benchmarkName, scenarioName, namespace);
-    var queue = executionRepository.get(namespace, benchmarkName);
+  private void updateStatus(String queueName, String scenarioName, String namespace) {
+    updateQueueItem(queueName, scenarioName, namespace);
+    var queue = executionRepository.get(namespace, queueName);
     var queueItem = queue.getItem(scenarioName);
-    if (queueItem.isRunning()) {
-        statusUpdater.markScenarioAsStarted(namespace, benchmarkName, scenarioName);
+    if (queueItem.isPending()) {
+        statusUpdater.markScenarioAsStarted(namespace, queueName, scenarioName);
     } else if (queueItem.isFinished()) {
-        statusUpdater.markScenarioAsCompleted(namespace, benchmarkName, scenarioName);
+        statusUpdater.markScenarioAsCompleted(namespace, queueName, scenarioName);
     }
   }
 }

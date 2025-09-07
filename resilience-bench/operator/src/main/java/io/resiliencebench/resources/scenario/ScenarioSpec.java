@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.vertx.core.json.JsonObject.mapFrom;
-
 public class ScenarioSpec {
 
   @JsonPropertyDescription("The workload to be used in the scenario")
