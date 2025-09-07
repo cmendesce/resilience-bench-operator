@@ -13,14 +13,8 @@ public class BenchmarkStatus {
   @PrinterColumn(name = "Phase", priority = 0)
   private String phase;
   
-  @PrinterColumn(name = "Total Scenarios", priority = 1)
-  private int totalScenarios;
-  
-  @PrinterColumn(name = "Running", priority = 2)
-  private int runningScenarios;
-  
-  @PrinterColumn(name = "Completed", priority = 3)
-  private int completedScenarios;
+  @PrinterColumn(name = "Execution Queue", priority = 1)
+  private String executionQueueName;
 
   private String executionId;
   private String lastReconcileTime;
@@ -32,22 +26,17 @@ public class BenchmarkStatus {
   public BenchmarkStatus() {
   }
 
-  public BenchmarkStatus(int totalScenarios) {
-    this.totalScenarios = totalScenarios;
+  public BenchmarkStatus(String executionQueueName) {
+    this.executionQueueName = executionQueueName;
     this.phase = Phase.PENDING;
-    this.runningScenarios = 0;
-    this.completedScenarios = 0;
     this.executionId = generateExecutionId();
     this.lastReconcileTime = getCurrentTimestamp();
     this.startTime = getCurrentTimestamp();
   }
 
-  public BenchmarkStatus(String phase, int totalScenarios, int runningScenarios, int completedScenarios, 
-                        String executionId, Long observedGeneration) {
+  public BenchmarkStatus(String phase, String executionQueueName, String executionId, Long observedGeneration) {
     this.phase = phase;
-    this.totalScenarios = totalScenarios;
-    this.runningScenarios = runningScenarios;
-    this.completedScenarios = completedScenarios;
+    this.executionQueueName = executionQueueName;
     this.executionId = executionId;
     this.observedGeneration = observedGeneration;
     this.lastReconcileTime = getCurrentTimestamp();
@@ -62,28 +51,12 @@ public class BenchmarkStatus {
     this.phase = phase;
   }
 
-  public int getTotalScenarios() {
-    return totalScenarios;
+  public String getExecutionQueueName() {
+    return executionQueueName;
   }
 
-  public void setTotalScenarios(int totalScenarios) {
-    this.totalScenarios = totalScenarios;
-  }
-
-  public int getRunningScenarios() {
-    return runningScenarios;
-  }
-
-  public void setRunningScenarios(int runningScenarios) {
-    this.runningScenarios = runningScenarios;
-  }
-
-  public int getCompletedScenarios() {
-    return completedScenarios;
-  }
-
-  public void setCompletedScenarios(int completedScenarios) {
-    this.completedScenarios = completedScenarios;
+  public void setExecutionQueueName(String executionQueueName) {
+    this.executionQueueName = executionQueueName;
   }
 
   public String getExecutionId() {
@@ -165,15 +138,8 @@ public class BenchmarkStatus {
     this.message = errorMessage;
   }
 
-  public void updateProgress(int running, int completed) {
-    this.runningScenarios = running;
-    this.completedScenarios = completed;
-    
-    if (completed == totalScenarios) {
-      markAsCompleted();
-    } else if (running > 0 || completed > 0) {
-      this.phase = Phase.RUNNING;
-    }
+  public void updatePhaseFromQueue(String queuePhase) {
+    this.phase = queuePhase;
   }
 
   private static String getCurrentTimestamp() {

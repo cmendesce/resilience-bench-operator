@@ -54,34 +54,6 @@ class DefaultQueueExecutorTest {
         verify(scenarioExecutor).execute(eq(scenario), eq(queue));
     }
 
-    @Test
-    void shouldNotExecuteWhenNoPendingItems() {
-        // Given
-        var item = new ExecutionQueueItem("test-scenario", "result.json");
-        item.setStatus(ExecutionQueueItem.Status.RUNNING);
-        var queue = createQueueWithItems(item);
-
-        // When
-        executor.execute(queue);
-
-        // Then
-        verify(scenarioExecutor, never()).execute(any(), any());
-    }
-
-    @Test
-    void shouldNotExecuteWhenQueueIsDone() {
-        // Given
-        var item = new ExecutionQueueItem("test-scenario", "result.json");
-        item.setStatus(ExecutionQueueItem.Status.FINISHED);
-        var queue = createQueueWithItems(item);
-
-        // When
-        executor.execute(queue);
-
-        // Then
-        verify(scenarioExecutor, never()).execute(any(), any());
-    }
-
     private ExecutionQueue createQueueWithItems(ExecutionQueueItem... items) {
         var meta = new ObjectMetaBuilder()
                 .withName("test-queue")

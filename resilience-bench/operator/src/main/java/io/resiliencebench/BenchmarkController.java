@@ -69,7 +69,7 @@ public class BenchmarkController implements Reconciler<Benchmark> {
 
       createQueue(benchmark, scenariosList);
 
-      var status = createOrUpdateStatus(benchmark, scenariosList.size());
+      var status = createOrUpdateStatus(benchmark, benchmarkName);
       benchmark.setStatus(status);
 
       logger.info("Benchmark reconciled {}. {} scenarios created", benchmarkName, scenariosList.size());
@@ -85,7 +85,7 @@ public class BenchmarkController implements Reconciler<Benchmark> {
   private UpdateControl<Benchmark> updateStatusWithError(Benchmark benchmark, String errorMessage) {
     var status = benchmark.getStatus();
     if (status == null) {
-      status = new BenchmarkStatus(0);
+      status = new BenchmarkStatus(benchmark.getMetadata().getName());
       benchmark.setStatus(status);
     }
     status.markAsFailed(errorMessage);
@@ -93,19 +93,20 @@ public class BenchmarkController implements Reconciler<Benchmark> {
     return UpdateControl.updateStatus(benchmark);
   }
 
-  private BenchmarkStatus createOrUpdateStatus(Benchmark benchmark, int totalScenarios) {
+  private BenchmarkStatus createOrUpdateStatus(Benchmark benchmark, String queueName) {
     var currentStatus = benchmark.getStatus();
     var currentGeneration = benchmark.getMetadata().getGeneration();
 
     if (currentStatus == null || currentStatus.needsReconciliation(currentGeneration)) {
-      var newStatus = new BenchmarkStatus(totalScenarios);
+      var newStatus = new BenchmarkStatus(queueName);
       newStatus.setObservedGeneration(currentGeneration);
-      logger.info("Created new status for benchmark {} with {} total scenarios",
-                 benchmark.getMetadata().getName(), totalScenarios);
+      logger.info("Created new status for benchmark {} with execution queue {}",
+                 benchmark.getMetadata().getName(), queueName);
       return newStatus;
     } else {
       currentStatus.updateReconcileTime();
       currentStatus.setObservedGeneration(currentGeneration);
+      currentStatus.setExecutionQueueName(queueName);
       logger.info("Updated existing status for benchmark {}", benchmark.getMetadata().getName());
       return currentStatus;
     }

@@ -13,12 +13,23 @@ import java.util.Optional;
 @ShortNames("eq")
 @Plural("queues")
 @Kind("Queue")
-public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, Void> implements Namespaced {
+public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, ExecutionQueueStatus> implements Namespaced {
   ExecutionQueue() { }
 
   public ExecutionQueue(ExecutionQueueSpec spec, ObjectMeta meta) {
     this.spec = spec;
     this.setMetadata(meta);
+    initializeStatus();
+  }
+
+  private void initializeStatus() {
+    if (this.status == null && this.spec != null && this.spec.getItems() != null) {
+      var executionId =
+              this.getMetadata().getLabels() != null && !this.getMetadata().getLabels().isEmpty()
+          ? this.getMetadata().getLabels().get("execution-id") 
+          : "exec-" + System.currentTimeMillis();
+      this.status = new ExecutionQueueStatus(this.spec.getItems().size(), executionId);
+    }
   }
 
   @JsonIgnore
@@ -34,5 +45,22 @@ public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, Void> imp
   @JsonIgnore
   public boolean isDone() {
     return getSpec().getItems().stream().allMatch(ExecutionQueueItem::isFinished);
+  }
+
+  @JsonIgnore
+  public void updateStatusFromItems() {
+    if (this.status == null) {
+      initializeStatus();
+    }
+    
+    if (this.status != null && this.spec != null && this.spec.getItems() != null) {
+      var items = this.spec.getItems();
+      var running = (int) items.stream().filter(ExecutionQueueItem::isRunning).count();
+      var completed = (int) items.stream().filter(ExecutionQueueItem::isFinished).count();
+      var pending = (int) items.stream().filter(ExecutionQueueItem::isPending).count();
+      
+      this.status.updateProgress(running, completed, pending);
+      this.status.updateReconcileTime();
+    }
   }
 }
