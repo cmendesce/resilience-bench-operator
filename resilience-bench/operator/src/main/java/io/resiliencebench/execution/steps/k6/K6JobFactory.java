@@ -26,6 +26,7 @@ public class K6JobFactory {
     return new JobBuilder()
             .withMetadata(meta)
             .withNewSpec()
+            .withTtlSecondsAfterFinished(120)
             .withNewTemplate()
             .withNewMetadata()
             .addToAnnotations("sidecar.istio.io/inject", "false")
