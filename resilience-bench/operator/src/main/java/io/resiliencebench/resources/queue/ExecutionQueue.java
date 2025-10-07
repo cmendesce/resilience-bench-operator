@@ -32,7 +32,17 @@ public class ExecutionQueue extends CustomResource<ExecutionQueueSpec, Void> imp
   }
 
   @JsonIgnore
+  public boolean hasPendingItems() {
+    return getSpec().getItems().stream().anyMatch(ExecutionQueueItem::isPending);
+  }
+
+  @JsonIgnore
   public boolean isDone() {
     return getSpec().getItems().stream().allMatch(ExecutionQueueItem::isFinished);
+  }
+
+  @JsonIgnore
+  public boolean isRunning() {
+    return getSpec().getItems().stream().anyMatch(ExecutionQueueItem::isRunning);
   }
 }

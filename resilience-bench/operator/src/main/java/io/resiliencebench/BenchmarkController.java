@@ -46,18 +46,30 @@ public class BenchmarkController implements Reconciler<Benchmark> {
     var benchmarkName = benchmark.getMetadata().getName();
     var namespace = benchmark.getMetadata().getNamespace();
     
-    logger.info("Reconciling benchmark: {} in namespace: {}", benchmarkName, namespace);
+    logger.info("Reconciling benchmark {}/{}", namespace, benchmarkName);
 
     try {
       var currentStatus = benchmark.getStatus();
       var currentGeneration = benchmark.getMetadata().getGeneration();
-      
-      if (currentStatus != null && 
-          currentStatus.isCompleted() && 
-          !currentStatus.needsReconciliation(currentGeneration)) {
-        logger.info("Benchmark {} is already completed and no spec changes detected, skipping reconciliation", benchmarkName);
+
+      if (currentStatus != null && !currentStatus.needsReconciliation(currentGeneration)) {
+        if (currentStatus.isCompleted()) {
+          logger.info("Benchmark {} is already completed, skipping reconciliation", benchmarkName);
+        }
+        else if (currentStatus.isRunning()) {
+          logger.info("Benchmark {} is currently running and no spec changes detected, skipping reconciliation", benchmarkName);
+        }
         currentStatus.updateReconcileTime();
         return UpdateControl.updateStatus(benchmark);
+      }
+
+      var currentQueue = queueRepository.find(benchmarkName, namespace);
+      if (currentQueue.isPresent()) {
+        if (currentQueue.get().hasPendingItems()) {
+          logger.info("Benchmark {} has an active execution queue, skipping reconciliation", benchmarkName);
+        }
+        
+        return UpdateControl.noUpdate();
       }
 
       var workload = workloadRepository.find(namespace, benchmark.getSpec().getWorkload());
@@ -83,7 +95,7 @@ public class BenchmarkController implements Reconciler<Benchmark> {
       return UpdateControl.updateStatus(benchmark);
       
     } catch (Exception e) {
-      logger.error("Error during reconciliation of benchmark: " + benchmarkName, e);
+      logger.error("Error during reconciliation of benchmark {}", benchmarkName, e);
       return updateStatusWithError(benchmark, "Reconciliation error: " + e.getMessage());
     }
   }

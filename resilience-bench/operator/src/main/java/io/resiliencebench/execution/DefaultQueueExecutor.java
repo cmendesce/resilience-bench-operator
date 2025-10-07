@@ -36,6 +36,11 @@ public class DefaultQueueExecutor implements QueueExecutor {
     var queueToExecute = executionRepository.find(queue.getMetadata())
             .orElseThrow(() -> new RuntimeException("Queue not found " + queue.getMetadata().getName()));
 
+    if (queueToExecute.isRunning()) {
+      logger.info("Queue has item running: {}", queueToExecute.getMetadata().getName());
+      return;
+    }
+
     var nextItem = queueToExecute.getNextPendingItem();
 
     if (nextItem.isPresent() && nextItem.get().isPending()) {
