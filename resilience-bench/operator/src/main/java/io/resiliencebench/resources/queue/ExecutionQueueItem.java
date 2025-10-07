@@ -12,7 +12,7 @@ public class ExecutionQueueItem {
   private String scenario;
   @JsonPropertyDescription("The status of the execution. Can be 'pending', 'running' or 'finished'. Automatically managed.")
   @JsonProperty(required = true)
-  private String phase;
+  private String phase = Phase.PENDING;
   @JsonPropertyDescription("The path of the file with the item's results. Automatically created.")
   private String resultFile;
 
