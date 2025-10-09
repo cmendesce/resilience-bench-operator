@@ -65,10 +65,11 @@ public class BenchmarkController implements Reconciler<Benchmark> {
 
       var currentQueue = queueRepository.find(benchmarkName, namespace);
       if (currentQueue.isPresent()) {
-        if (currentQueue.get().hasPendingItems()) {
-          logger.info("Benchmark {} has an active execution queue, skipping reconciliation", benchmarkName);
+        if (currentQueue.get().hasPendingItems() && !currentQueue.get().isRunning()) {
+          logger.info("Benchmark {} has an active execution queue with pending items and none running", benchmarkName);
+          queueExecutor.execute(currentQueue.get());
         }
-        
+
         return UpdateControl.noUpdate();
       }
 
