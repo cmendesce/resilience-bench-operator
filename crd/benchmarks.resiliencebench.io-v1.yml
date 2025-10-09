@@ -36,6 +36,15 @@ spec:
         properties:
           spec:
             properties:
+              autoCreateQueue:
+                default: true
+                description: Whether the ExecutionQueue should be automatically created
+                  if it does not exist
+                type: boolean
+              queueName:
+                description: The name of the execution queue to be used for running
+                  the benchmark scenarios
+                type: string
               scenarios:
                 description: The set of scenarios templates to be processed and then
                   generated as scenarios
