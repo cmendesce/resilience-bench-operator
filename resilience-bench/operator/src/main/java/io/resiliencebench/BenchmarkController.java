@@ -94,7 +94,6 @@ public class BenchmarkController implements Reconciler<Benchmark> {
       
       queueExecutor.execute(executionQueue);
       return UpdateControl.updateStatus(benchmark);
-      
     } catch (Exception e) {
       logger.error("Error during reconciliation of benchmark {}", benchmarkName, e);
       return updateStatusWithError(benchmark, "Reconciliation error: " + e.getMessage());
@@ -144,20 +143,28 @@ public class BenchmarkController implements Reconciler<Benchmark> {
 
   private ExecutionQueue prepareToRunScenarios(Benchmark benchmark, List<Scenario> scenariosList) {
     var namespace = benchmark.getMetadata().getNamespace();
-    
-    scenarioRepository.deleteAll(namespace);
-    scenariosList.forEach(scenarioRepository::create);
 
-    queueRepository.deleteAll(namespace);
-    var queueCreated = ExecutionQueueFactory.create(benchmark, scenariosList);
-    
-    if (benchmark.getStatus() != null && benchmark.getStatus().getExecutionId() != null) {
-      if (queueCreated.getMetadata().getLabels() == null) {
-        queueCreated.getMetadata().setLabels(new java.util.HashMap<>());
+    if (benchmark.getSpec().isAutoCreateQueue()) {
+      scenarioRepository.deleteAll(namespace);
+      scenariosList.forEach(scenarioRepository::create);
+
+      queueRepository.deleteAll(namespace);
+      var queueCreated = ExecutionQueueFactory.create(benchmark, scenariosList);
+
+      if (benchmark.getStatus() != null && benchmark.getStatus().getExecutionId() != null) {
+        if (queueCreated.getMetadata().getLabels() == null) {
+          queueCreated.getMetadata().setLabels(new java.util.HashMap<>());
+        }
+        queueCreated.getMetadata().getLabels().put("execution-id", benchmark.getStatus().getExecutionId());
       }
-      queueCreated.getMetadata().getLabels().put("execution-id", benchmark.getStatus().getExecutionId());
+
+      return queueRepository.create(queueCreated);
+    } else {
+      var existingQueue = queueRepository.find(namespace, benchmark.getSpec().getQueueName());
+      if (existingQueue.isEmpty()) {
+        throw new IllegalStateException("ExecutionQueue not found and autoCreateQueue is false");
+      }
+      return existingQueue.get();
     }
-    
-    return queueRepository.create(queueCreated);
   }
 }
